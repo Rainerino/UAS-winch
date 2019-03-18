@@ -18,6 +18,55 @@ The testing uses travis.
 |rc_in_5|input| |stop the motor.|
 |rc_in_6|input| |stop the rope from going down. A soft brake.|
 
+### Driver modules
+
+#### Encoder
+ 
+ 
+ 
+|name |return | parameter |description |
+|---|---|---|---|
+|reset | | | 
+|total_distance | | | 
+|valid | | | 
+|total_distance | | | 
+|current_speed | | | 
+|set_desired_speed | | | 
+| | | | 
+
+#### Motor
+
+We are planning to use motor mainly for retracting the rope. It has two actions: start and stop. 
+
+As a back up action to map the speed to motor control, we have Motor.run_at()
+
+|name |return | parameter |description |
+|---|---|---|---|
+|set_range | | | | 
+|set_retract | | | | 
+|set_brake_range | | | | 
+|stop | | | | 
+|start | | | | 
+|run_at | | | | 
+
+
+#### Servo
+
+
+
+|name |return | parameter |description |
+|---|---|---|---|
+|set_stop | | |
+|set_brake_range | | | | 
+|set_release | | | | 
+|stop | | | | 
+|brake | | | | 
+|release | | | | 
+| | | | | 
+
+
+### Controller modules
+
 
 
 ## Set up
