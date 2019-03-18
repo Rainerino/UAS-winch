@@ -17,6 +17,7 @@ The testing uses travis.
 |rc_in_4|input| |trigger the retraction of the rope |
 |rc_in_6|input| |stop the rope from going down. A soft brake.|
 |rc_in_7|input| |trigger manual input or auto
+|rc_in_8|input| |operation reset
 
 ### Driver modules
 
@@ -34,6 +35,7 @@ The testing uses travis.
 
 > Reason why not to use int: **On the Arduino Uno (and other ATmega based boards) an int stores a 16-bit (2-byte) value. This yields a range of -32,768 to 32,767**
 
+See encoder at: https://www.pjrc.com/teensy/td_libs_Encoder.html
 
 #### Motor
 
@@ -69,9 +71,8 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 
 |name |return | parameter |description |
 |---|---|---|---|
-|start_release |void | void| |
-|start_retracting | void| void| |
-|stable_release_speed | void| void| |
+|release |bool | void| | if true, the release is completed
+|retract | bool| void| |
 | | | | |
 | | | | |
 
@@ -82,8 +83,12 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 platformio init --ide clion --board uno
 > This will start the project. uno is chosen here but feel free to change it later in [platofrmio.ini](./platformio.ini#13)
 
-## Developement
+## Development
 
 I set things up on Clion, but feel free to use Vscode. Sometimes Vscode is better, if all the button works. 
+
+## Operation
+
+> Note: after manual to auto switch, the mission will be reseted automatically
 
 ### run the project

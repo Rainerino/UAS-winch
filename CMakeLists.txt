@@ -51,4 +51,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} src/drivers/UAS_driver.cpp src/drivers/UAS_driver.h src/controller/Controller.cpp src/controller/Controller.h)
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/drivers/UAS_rc_in.cpp src/drivers/UAS_rc_in.h)

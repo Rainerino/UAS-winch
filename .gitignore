@@ -4,4 +4,4 @@
 CMakeListsPrivate.txt
 .idea/
 cmake-build-debug/
-
+.vscode/
