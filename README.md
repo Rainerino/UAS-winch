@@ -15,8 +15,8 @@ The testing uses travis.
 |rc_in_2|input||instant brake, overwrite all controls. Used as failsafe|
 |rc_in_3|input| |360 degree diaos on the transmitter. used to control the speed.|
 |rc_in_4|input| |trigger the retraction of the rope |
-|rc_in_5|input| |stop the motor.|
 |rc_in_6|input| |stop the rope from going down. A soft brake.|
+|rc_in_7|input| |trigger manual input or auto
 
 ### Driver modules
 
@@ -69,9 +69,9 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 
 |name |return | parameter |description |
 |---|---|---|---|
-|start_release | | | |
-|start_retracting | | | |
-|stable_release_speed | | | |
+|start_release |void | void| |
+|start_retracting | void| void| |
+|stable_release_speed | void| void| |
 | | | | |
 | | | | |
 
