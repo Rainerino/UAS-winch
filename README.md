@@ -26,13 +26,14 @@ The testing uses travis.
  
 |name |return | parameter |description |
 |---|---|---|---|
-|reset | | | 
-|total_distance | | | 
-|valid | | | 
-|total_distance | | | 
-|current_speed | | | 
-|set_desired_speed | | | 
-| | | | 
+|encoder_reset |void |void | | hard reset all the encoder parameters 
+|encoder_total_distance | unsigned long (mm)| void |Long variables are extended size variables for number storage, and store 32 bits (4 bytes), from -2,147,483,648 to 2,147,483,647. Since we are not concerned about having 2,000,000 meter ropes so long would do nicely. 
+|encoder_valid |bool | void| check if we have exceed the maximum rpm 
+|encoder_current_speed |void |unsigned int | termianl velocity is 55m/s, we are fine with having capped at 66 m/s 
+|encoder_set_max_rpm |int |void | 
+
+> Reason why not to use int: **On the Arduino Uno (and other ATmega based boards) an int stores a 16-bit (2-byte) value. This yields a range of -32,768 to 32,767**
+
 
 #### Motor
 
@@ -42,12 +43,11 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 
 |name |return | parameter |description |
 |---|---|---|---|
-|set_range | | | | 
-|set_retract | | | | 
-|set_brake_range | | | | 
-|stop | | | | 
-|start | | | | 
-|run_at | | | | 
+|motor_set_range |void | int low, high, steps| | 
+|~~motor_set_brake_range~~ | void | int low, high, steps| | 
+|motor_stop | void|void | | 
+|motor_start |void |void | | 
+|motor_run_at |void |float  |precent from 1 to 0 | 
 
 
 #### Servo
@@ -56,16 +56,25 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 
 |name |return | parameter |description |
 |---|---|---|---|
-|set_stop | | |
-|set_brake_range | | | | 
-|set_release | | | | 
-|stop | | | | 
-|brake | | | | 
-|release | | | | 
+|servo_set_stop |void | int degree|
+|servo_set_brake_range | void| | | 
+|servo_set_release |void |int degree | | 
+|servo_stop |void |int degree | | 
+|servo_brake_at |void |float percent | | 
+|servo_release | void| int degree| | 
 | | | | | 
 
 
 ### Controller modules
+
+|name |return | parameter |description |
+|---|---|---|---|
+|start_release | | | |
+|start_retracting | | | |
+|stable_release_speed | | | |
+| | | | |
+| | | | |
+
 
 
 
