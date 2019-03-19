@@ -25,6 +25,15 @@ class UAS_driver {
 
 public:
     // set up funtions
+    struct rc_channel{
+        uint8_t pin;
+        uint32_t raw_value; // just in case
+        bool trigger; // save the trigger value
+        uint8_t mode; // to save mode
+        bool change; // for detecting mode changes
+        uint16_t precentage; // value out of 100, for speed control
+    }rc_failsafe, rc_speed_ctrl, rc_op_mode, rc_ctrl_mode;
+
     UAS_driver();
     void attach_motor(uint8_t motor_pin,uint8_t in1, uint8_t in2);
     void attach_servo(int servo_pin);
@@ -46,9 +55,16 @@ public:
     void servo_brake_at(float brake_precent);
     void servo_release();
     void servo_full_brake();
+
     void servo_slow_brake();
 
-    void test_message();
+    void driver_test_message(Encoder uas_encoder);
+
+    void change_speed();
+
+
+
+
 
     uint16_t current_speed;
     uint16_t encoder_max_rpm;

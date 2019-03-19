@@ -101,6 +101,32 @@ void UAS_driver::servo_full_brake(){
     delay(10);// for servo to get to that position;
 }
 
+void UAS_driver::driver_test_message(Encoder uas_encoder){
+    // manual mode
+    Serial.println("============================");
+    Serial.println(ENCODER_MM_PER_TICK_X_1000);
+    Serial.println(ENCODER_MM_PER_RES);
+    Serial.println(ENCODER_TICK_PER_RES);
 
+    Serial.print("TOTAL Ticks: ");
+    Serial.println(encoder_cur_tick);
 
+    Serial.print("Distance: ");
+    Serial.println(this->encoder_total_distance(uas_encoder));
+
+    Serial.print("Difference: ");
+    Serial.println(encoder_cur_tick - encoder_prev_tick);
+
+    Serial.print("Speed: ");
+    Serial.println(current_speed);
+
+    Serial.print("Valid? ");
+    Serial.println(encoder_invalid);
+
+    Serial.print("RAW_Encoder_reading: ");
+    Serial.println(uas_encoder.read());
+
+    Serial.println("============================");
+    Serial.println();
+}
 

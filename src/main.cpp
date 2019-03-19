@@ -10,13 +10,23 @@
 #include "Arduino.h"
 #include "drivers/UAS_driver.h"
 
-#define SIGNAL_PIN 12
+
 #define SERVO_PIN 9
 #define A_SIGNAL 2 //Pin number for encoder
 #define B_SIGNAL 3 //Pin munber for encoder
 #define enA 5
 #define in1 4
 #define in2 6
+#define SPEED_CTRL_PIN A0
+#define FAILSAFE_PIN A1
+#define OP_MODE_PIN A2
+#define CTRL_MODE_PIN A3
+
+#define MANUAL_MODE 0
+#define AUTO_MODE 1
+#define IDLE_MODE 0
+#define RELEASE_MODE 1
+#define RETRACT_MODE 2
 
 const int LOOP_SPEED = 500; //ms updating at 1/50*10^3 = 20Hz
 const int SPEED_DELTA_T = 200; //ms
@@ -25,7 +35,7 @@ const int SERVO_BRAKE = 90;
 const int SERVO_RELEASE = 0;
 const int DESIRED_SPEED = 2000; //2m/s, 2000mm/s
 
-Encoder uas_encoder(2,3);
+Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
 UAS_driver driver;
 
@@ -37,10 +47,6 @@ void rc_input_update();
 bool auto_mission_completed;
 bool audo_release_completed;
 bool audo_retract_completed;
-
-int rc_reset_channel = 0;
-int rc_mode_channel = 0;
-int rc_arm_channel = 0;
 
 int prev_mode_channel = 0;
 
@@ -60,7 +66,10 @@ void setup() {
     auto_mission_completed = false;
     Serial.begin(9600);
     driver.servo_brake_range(SERVO_RELEASE, SERVO_BRAKE);
-
+    driver.rc_ctrl_mode.pin = CTRL_MODE_PIN;
+    driver.rc_op_mode.pin = OP_MODE_PIN;
+    driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
+    driver.rc_failsafe.pin = FAILSAFE_PIN;
     encoder_speed.start();
     rc_update.start();
 }
@@ -73,11 +82,12 @@ void loop() {
 
     // check mode: auto or manual.
 
-    if (rc_mode_channel == 0){
+    if (driver.rc_op_mode.mode == AUTO_MODE){
         // auto mode
         // when swtich from manual to release, add a reset
-        if (prev_mode_channel != rc_mode_channel){
+        if (driver.rc_op_mode.change){
             driver.encoder_reset(uas_encoder);
+            driver.rc_op_mode.change = false;
         }
 
         if (!auto_mission_completed){
@@ -91,36 +101,11 @@ void loop() {
             auto_mission_completed = true;
         }
         // manual mode
-    }else if (rc_mode_channel == 1){
+    }else if (driver.rc_op_mode.mode == MANUAL_MODE){
 
     }
 
-
-
-    // manual mode
-
-    Serial.println(ENCODER_MM_PER_TICK_X_1000);
-    Serial.println(ENCODER_MM_PER_RES);
-    Serial.println(ENCODER_TICK_PER_RES);
-
-    Serial.print("TOTAL Ticks: ");
-    Serial.println(driver.encoder_cur_tick);
-
-    Serial.print("Distance: ");
-    Serial.println(driver.encoder_total_distance(uas_encoder));
-
-    Serial.print("Difference: ");
-    Serial.println(difference);
-
-    Serial.print("Speed: ");
-    Serial.println(driver.current_speed);
-
-    Serial.print("Valid? ");
-    Serial.println(driver.encoder_invalid);
-
-    Serial.print("RAW READ ");
-    Serial.println(uas_encoder.read());
-    Serial.println("============================");
+    driver.driver_test_message(uas_encoder);
     delay(LOOP_SPEED);
 }
 
@@ -130,20 +115,6 @@ void release(){
         driver.servo_release();
         // speed controller goes here.
         // a simple pid controller
-
-        int prev_err;
-        int err = DESIRED_SPEED - driver.current_speed;
-        int I_err = err + I_err;
-        int D_err = err - prev_err;
-
-        int Kp, KD, Ki;
-        int change = Kp * err + KD * D_err + Ki * I_err;
-        prev_err = err;
-
-        
-
-
-
     } else{
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
@@ -167,5 +138,18 @@ void calculate_speed(){
 }
 void rc_input_update(){
     // channel updates
+    // update op_mode change
+    driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH, 25000);
+    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
+    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
+
+    driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH, 25000);
+    driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
+
+    driver.rc_speed_ctrl.raw_value = pulseIn(driver.rc_speed_ctrl.pin, HIGH, 25000);
+    driver.rc_speed_ctrl.precentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 1000, 2000, 0, 100));
+
+    driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH, 25000);
+
 }
 

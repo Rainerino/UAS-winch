@@ -10,14 +10,11 @@ The testing uses travis.
 |---|---|---|---|
 |motor|output |enA | |
 |servo|output|9| |
-|encoder|input||read the ticks from encoder |
-|rc_in_1|input|12|trigger signal of the release|
-|rc_in_2|input||instant brake, overwrite all controls. Used as failsafe|
-|rc_in_3|input| |360 degree diaos on the transmitter. used to control the speed.|
-|rc_in_4|input| |trigger the retraction of the rope |
-|rc_in_6|input| |stop the rope from going down. A soft brake.|
-|rc_in_7|input| |trigger manual input or auto
-|rc_in_8|input| |operation reset
+|encoder|input| |read the ticks from encoder |
+|rc_failsafe|input| |instant brake, overwrite all controls. Used as failsafe|
+|rc_speed_ctrl|input| |speed controller (throttle). Brake for release, motor for retract.|
+|rc_op_mode|input| |mode: release, retract or idle|
+|rc_ctrl_mode|input| |trigger manual input or auto |
 
 ### Driver modules
 
@@ -71,10 +68,13 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 
 |name |return | parameter |description |
 |---|---|---|---|
-|release |bool | void| | if true, the release is completed
+|release |bool | void|if true, the release is completed | 
 |retract | bool| void| |
+|change_speed|void|int speed |takes the current speed, and output a new speed. Since this is a nonlinear control, we are just going to keep    | 
 | | | | |
-| | | | |
+
+For rc: https://www.sparkfun.com/tutorials/348
+with the possiblity of using using ppm, since there are lots of channels: https://www.instructables.com/id/Reading-RC-Receiver-PPM-Signal-Using-Arduino/
 
 
 
