@@ -57,7 +57,7 @@ uint16_t altitude = 30000; // goes up to 65 meters
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T); // update speed at certain rate
 
-Ticker rc_update(rc_input_update, RC_DELTA_T); // update rc inputs at certain rate
+Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain rate
 
 
 
