@@ -18,7 +18,7 @@ const uint8_t  DRUM_2_ENCODER_GEAR_RATIO_X_10 = 14;
 const double ENCODER_MM_PER_RES  = 2* M_PI * DRUM_R; // 439 ->439.82 / 2
 const uint32_t ENCODER_MM_PER_TICK_X_1000 =  uint32_t((1000* ENCODER_MM_PER_RES / ENCODER_TICK_PER_RES) *
         DRUM_2_ENCODER_GEAR_RATIO_X_10/10) ; // 565-> 7587->7601/2, should be 542.9913 * 1.4 = 7.606 -> 7606/2
-
+const uint32_t SERVO_DELAY = 10;
 
 
 class UAS_driver {
@@ -52,7 +52,7 @@ public:
     void motor_reverse_direction();
 
     void servo_brake_range(uint16_t low, uint16_t high);
-    void servo_brake_at(float brake_precent);
+    void servo_brake_at(uint16_t brake_precent);
     void servo_release();
     void servo_full_brake();
 
