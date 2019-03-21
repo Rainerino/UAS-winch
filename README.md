@@ -77,6 +77,13 @@ For rc: https://www.sparkfun.com/tutorials/348
 with the possiblity of using using ppm, since there are lots of channels: https://www.instructables.com/id/Reading-RC-Receiver-PPM-Signal-Using-Arduino/
 
 
+### Display
+
+[OLED module](https://www.banggood.com/0_91-Inch-128x32-IIC-I2C-Blue-OLED-LCD-Display-DIY-Oled-Module-SSD1306-Driver-IC-DC-3_3V-5V-p-1140506.html?rmmds=search&cur_warehouse=USA) from Banggoood 
+
+#### Set up
+Follow this [guide](https://startingelectronics.org/tutorials/arduino/modules/OLED-128x64-I2C-display/). **Note that the guide is based on 128x64, the one we have is 128x32**
+
 
 
 ## Set up
@@ -90,5 +97,10 @@ I set things up on Clion, but feel free to use Vscode. Sometimes Vscode is bette
 ## Operation
 
 > Note: after manual to auto switch, the mission will be reseted automatically
+
+### Control
+| | | | |
+|---|---|---|---|
+
 
 ### run the project
