@@ -63,16 +63,17 @@ uint16_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
 void UAS_driver::motor_set_range(uint16_t low, uint16_t high){
     motor_high = high;
     motor_low = low;
+    digitalWrite(motor_in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
+    digitalWrite(motor_in2, LOW); //HIGH if releasing the rope, LOW if realing the rope
 }
 void UAS_driver::motor_stop(){
-    analogWrite(uint8_t(motor_low), motor_pin);
+    analogWrite( motor_pin, 0);
 }
 void UAS_driver::motor_start(){
-    analogWrite(uint8_t(motor_high), motor_pin);
-
+    analogWrite(motor_pin, uint8_t(motor_high));
 }
 void UAS_driver::motor_run_at(float percent){
-    analogWrite(uint8_t( (motor_high - motor_low) * percent ), motor_pin);
+    analogWrite(motor_pin, uint8_t( (motor_high - motor_low) * percent ));
 }
 void UAS_driver::motor_reverse_direction(){
     motor_direction = !motor_direction;
@@ -85,6 +86,7 @@ void UAS_driver::motor_reverse_direction(){
     }
 }
 
+// ========================================================================
 void UAS_driver::servo_brake_range(uint16_t low, uint16_t high){
     servo_low_brake_angle = low;
     servo_high_brake_angle = high;
@@ -99,6 +101,11 @@ void UAS_driver::servo_release(){
 }
 void UAS_driver::servo_full_brake(){
     uas_servo.write(servo_high_brake_angle);
+    delayMicroseconds(SERVO_DELAY);// for servo to get to that position;
+}
+
+void UAS_driver::servo_slow_brake() {
+    uas_servo.write((servo_high_brake_angle-servo_low_brake_angle)/2);
     delayMicroseconds(SERVO_DELAY);// for servo to get to that position;
 }
 
@@ -126,6 +133,14 @@ void UAS_driver::driver_test_message(Encoder uas_encoder){
 
     Serial.print("RAW_Encoder_reading: ");
     Serial.println(uas_encoder.read());
+    Serial.print("FAILSAFE: ");
+    Serial.println(rc_failsafe.raw_value);
+    Serial.print("Speed: ");
+    Serial.println(rc_speed_ctrl.raw_value);
+    Serial.print("control: ");
+    Serial.println(rc_ctrl_mode.raw_value);
+    Serial.print("op: ");
+    Serial.println(rc_op_mode.raw_value);
 
     Serial.println("============================");
     Serial.println();

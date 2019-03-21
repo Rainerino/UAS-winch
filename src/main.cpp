@@ -27,12 +27,16 @@
 #define RELEASE_MODE 1
 #define RETRACT_MODE 2
 
-const int LOOP_SPEED = 500; //ms updating at 1/50*10^3 = 20Hz
+const int LOOP_SPEED = 50; //ms updating at 1/50*10^3 = 20Hz
 const int SPEED_DELTA_T = 200; //ms
-const int RC_DELTA_T = 100; // ms
+const int RC_DELTA_T = 10; // ms
+
 const int SERVO_BRAKE = 95;
 const int SERVO_RELEASE = 40;
+
 const int DESIRED_SPEED = 2000; //2m/s, 2000mm/s
+const int MOTOR_LOW = 100;
+const int MOTOR_HIGH = 255;
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
@@ -86,18 +90,27 @@ void calculate_speed(){
 void rc_input_update(){
     // channel updates
     // update op_mode change
-//    driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
-//    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
-//    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
+//    noInterrupts();
+    driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
+    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
+    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
 
     driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH);
     driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
 
     driver.rc_speed_ctrl.raw_value = pulseIn(driver.rc_speed_ctrl.pin, HIGH);
-    driver.rc_speed_ctrl.precentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 1000, 2000, 0, 100));
+    driver.rc_speed_ctrl.precentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 950, 2000, 0, 100));
+    //    Serial.println("CALLED");
+    driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH);
 
-//    Serial.println("CALLED");
-//    driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH);
+    if(driver.rc_ctrl_mode.raw_value < 1200){ //
+        driver.rc_ctrl_mode.mode = IDLE_MODE;
+    }else if(driver.rc_ctrl_mode.raw_value > 1700){
+        driver.rc_ctrl_mode.mode = RELEASE_MODE;
+    }else{
+        driver.rc_ctrl_mode.mode = RETRACT_MODE; // mid is retract
+    }
+//    interrupts();
 
 }
 
@@ -113,19 +126,18 @@ void static main_operation_setup(){
     driver.rc_op_mode.pin = OP_MODE_PIN;
     driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
     driver.rc_failsafe.pin = FAILSAFE_PIN;
+    driver.motor_set_range(MOTOR_LOW, MOTOR_HIGH);
+
     //set up input and output pins
     encoder_speed.start();
     rc_update.start();
 }
+
 void static main_operation_loop() {
     encoder_speed.update();
     rc_update.update();
 
-    // failsafe
-
-    // check mode: auto or manual.
-
-    if (driver.rc_op_mode.mode == AUTO_MODE){
+    if (false){
         // auto mode
         // when swtich from manual to release, add a reset
         if (driver.rc_op_mode.change){
@@ -144,12 +156,21 @@ void static main_operation_loop() {
             auto_mission_completed = true;
         }
         // manual mode
-    }else if (driver.rc_op_mode.mode == MANUAL_MODE){
+    }else if (true){
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();
             driver.motor_stop();
         }else{
-
+            if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
+                driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
+                driver.motor_stop();
+            }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
+                driver.servo_release();
+                driver.motor_start();
+            }else{
+                driver.servo_slow_brake();
+                driver.motor_stop();
+            }
         }
     }
 
@@ -158,6 +179,7 @@ void static main_operation_loop() {
 }
 
 void setup() {
+    // main_operation_setup();
     main_operation_setup();
 }
 
@@ -170,6 +192,7 @@ void test_rc_setup(){
     driver.servo_brake_range(0, 180);
     driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
     driver.rc_failsafe.pin = FAILSAFE_PIN;
+    driver.rc_ctrl_mode.pin = CTRL_MODE_PIN;
     Serial.begin(9600);
     rc_update.start();
 }
@@ -178,12 +201,13 @@ void test_rc_loop() {
         driver.servo_full_brake();
     }else{
         driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
-
     }
     rc_update.update();
 
     Serial.println(driver.rc_failsafe.raw_value);
     Serial.println(driver.rc_speed_ctrl.raw_value);
+    Serial.println(driver.rc_ctrl_mode.raw_value);
+    Serial.println(driver.rc_ctrl_mode.mode);
     Serial.println("=============");
 
 }
