@@ -3,7 +3,7 @@
 ## TODO
 
 - change TIcker with TimerOne? https://www.pjrc.com/teensy/td_libs_TimerOne.html
-- more testing files. Maybe use C++ testing frameworks, since pio testing is not free (well..., reasonable business module)
+- more testing files. Maybe use C++ testing frameworks, since pio testing is not free (well..., reasonable business module). CPPUTest
 - figure out the direction of the motor
 - consider power on motor for releasing?
 - find a documentation tool, that is better than MARKDOWN LOL
