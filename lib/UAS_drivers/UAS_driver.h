@@ -8,7 +8,6 @@
 
 #include <Servo.h>
 #include <Encoder.h>
-#include <main.h>
 #include "math.h"
 
 
@@ -28,7 +27,7 @@ public:
     struct rc_channel{
         uint8_t pin;
         uint32_t raw_value; // just in case
-        bool trigger; // save the trigger value
+        bool trigger; // save the trigger value. Tru eto triggered
         uint8_t mode; // to save mode
         bool change; // for detecting mode changes
         uint16_t precentage; // value out of 100, for speed control

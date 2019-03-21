@@ -3,7 +3,7 @@
 //
 
 
-#include "UAS_driver.h"
+#include "./UAS_driver.h"
 
 
 UAS_driver::UAS_driver() {
@@ -90,10 +90,6 @@ void UAS_driver::servo_brake_range(uint16_t low, uint16_t high){
     servo_high_brake_angle = high;
 }
 void UAS_driver::servo_brake_at(uint16_t brake_precent){
-    // tried to
-    Serial.println(static_cast<int>(map(brake_precent , 0, 100, servo_low_brake_angle, servo_high_brake_angle)));
-    Serial.print("READ: ");
-    Serial.println(uas_servo.read());
     uas_servo.write(static_cast<int>(map(brake_precent , 0, 100, servo_low_brake_angle, servo_high_brake_angle)));
     delayMicroseconds(SERVO_DELAY);
 }

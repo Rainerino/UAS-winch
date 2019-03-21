@@ -8,8 +8,7 @@
 #include <Ticker.h>
 #include "main.h"
 #include "Arduino.h"
-#include "drivers/UAS_driver.h"
-
+#include "../lib/UAS_drivers/UAS_driver.h"
 
 #define SERVO_PIN 9
 #define A_SIGNAL 2 //Pin number for encoder
@@ -17,7 +16,7 @@
 #define enA 5
 #define in1 4
 #define in2 6
-#define SPEED_CTRL_PIN 4
+#define SPEED_CTRL_PIN A1
 #define FAILSAFE_PIN A2
 #define OP_MODE_PIN A3
 #define CTRL_MODE_PIN A4
@@ -30,9 +29,9 @@
 
 const int LOOP_SPEED = 500; //ms updating at 1/50*10^3 = 20Hz
 const int SPEED_DELTA_T = 200; //ms
-const int RC_DELTA_T = 10; // ms
-const int SERVO_BRAKE = 90;
-const int SERVO_RELEASE = 0;
+const int RC_DELTA_T = 100; // ms
+const int SERVO_BRAKE = 95;
+const int SERVO_RELEASE = 40;
 const int DESIRED_SPEED = 2000; //2m/s, 2000mm/s
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
@@ -48,14 +47,11 @@ bool auto_mission_completed;
 bool audo_release_completed;
 bool audo_retract_completed;
 
-int prev_mode_channel = 0;
-
-
 
 uint16_t difference;
 uint16_t altitude = 30000; // goes up to 65 meters
 
-Ticker encoder_speed(calculate_speed, SPEED_DELTA_T); // update speed at certain rate
+Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
 Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain rate
 
@@ -90,35 +86,21 @@ void calculate_speed(){
 void rc_input_update(){
     // channel updates
     // update op_mode change
-    driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
-    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
-    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
+//    driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
+//    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
+//    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
 
     driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH);
     driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
 
     driver.rc_speed_ctrl.raw_value = pulseIn(driver.rc_speed_ctrl.pin, HIGH);
     driver.rc_speed_ctrl.precentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 1000, 2000, 0, 100));
-    driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH);
+
+//    Serial.println("CALLED");
+//    driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH);
 
 }
 
-void static test_rc_setup(){
-    driver.attach_servo(SERVO_PIN);
-    driver.servo_brake_range(SERVO_RELEASE, SERVO_BRAKE);
-    driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
-    Serial.begin(9600);
-    rc_update.start();
-}
-void static test_rc_loop() {
-    rc_update.update();
-    driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
-
-//    Serial.println(driver.rc_speed_ctrl.precentage);
-//    Serial.println(driver.rc_speed_ctrl.raw_value);
-//    Serial.println(pulseIn(driver.rc_speed_ctrl.pin, HIGH));
-//    Serial.println("=============");
-}
 
 void static main_operation_setup(){
     driver = UAS_driver();
@@ -131,6 +113,7 @@ void static main_operation_setup(){
     driver.rc_op_mode.pin = OP_MODE_PIN;
     driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
     driver.rc_failsafe.pin = FAILSAFE_PIN;
+    //set up input and output pins
     encoder_speed.start();
     rc_update.start();
 }
@@ -162,7 +145,12 @@ void static main_operation_loop() {
         }
         // manual mode
     }else if (driver.rc_op_mode.mode == MANUAL_MODE){
+        if (driver.rc_failsafe.trigger){
+            driver.servo_full_brake();
+            driver.motor_stop();
+        }else{
 
+        }
     }
 
     driver.driver_test_message(uas_encoder);
@@ -170,11 +158,33 @@ void static main_operation_loop() {
 }
 
 void setup() {
-    test_rc_setup();
+    main_operation_setup();
 }
 
 void loop() {
-    test_rc_loop();
+    main_operation_loop();
+
+}
+void test_rc_setup(){
+    driver.attach_servo(SERVO_PIN);
+    driver.servo_brake_range(0, 180);
+    driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
+    driver.rc_failsafe.pin = FAILSAFE_PIN;
+    Serial.begin(9600);
+    rc_update.start();
+}
+void test_rc_loop() {
+    if (driver.rc_failsafe.trigger){
+        driver.servo_full_brake();
+    }else{
+        driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
+
+    }
+    rc_update.update();
+
+    Serial.println(driver.rc_failsafe.raw_value);
+    Serial.println(driver.rc_speed_ctrl.raw_value);
+    Serial.println("=============");
 
 }
 
