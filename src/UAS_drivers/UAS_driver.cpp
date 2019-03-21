@@ -38,9 +38,9 @@ void UAS_driver::attach_servo(int servo_pin){
 
 void UAS_driver::encoder_reset(Encoder uas_encoder){
     uas_encoder.write(0);
+    encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
 }
 uint32_t UAS_driver::encoder_total_distance(Encoder uas_encoder){
-
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
     return uint32_t(encoder_cur_tick * ENCODER_MM_PER_TICK_X_1000 / 1000.0);
 }
@@ -50,13 +50,23 @@ bool UAS_driver::encoder_valid(uint16_t delta_t){
     encoder_invalid = current_speed > (((encoder_max_rpm / 60) * ENCODER_TICK_PER_RES) * (ENCODER_MM_PER_TICK_X_1000 /1000.0) ) * (delta_t/1);
     return encoder_invalid;
 }
+
+void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_encoder){
+    auto difference = encoder_tick_diff(uas_encoder);
+
+    if (difference!= 0) {
+        current_speed = uint16_t((difference * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
+    }else{
+        // avoid 0 division
+        current_speed = 0;
+    }
+}
+
+
 uint16_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
-
     auto difference = uint16_t(abs(encoder_cur_tick - encoder_prev_tick));
-
     encoder_prev_tick = encoder_cur_tick;
-
     return difference;
 }
 

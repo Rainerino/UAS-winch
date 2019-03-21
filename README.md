@@ -1,27 +1,52 @@
 # UAS-winch
 
+## TODO
+
+- change TIcker with TimerOne? https://www.pjrc.com/teensy/td_libs_TimerOne.html
+- more testing files. Maybe use C++ testing frameworks, since pio testing is not free (well..., reasonable business module)
+- figure out the direction of the motor
+- consider power on motor for releasing?
+- find a documentation tool, that is better than MARKDOWN LOL
+- finish LCD display driver
+
 ## Description
 
 This program is designed, implemented and tested for UAS's winch system. It's writen was platoformio on Clion and VSCode in c and c++.
 The testing uses travis.
 
+## Operation
 
-|name| type of signal (input/output)|port number|description|
+> Note: after manual to auto switch, the mission will be reseted automatically
+
+| mode | controls | description |comment |
 |---|---|---|---|
-|motor|output |enA | |
-|servo|output|9| |
-|encoder|input| |read the ticks from encoder |
-|rc_failsafe|input| |instant brake, overwrite all controls. Used as failsafe|
-|rc_speed_ctrl|input| |speed controller (throttle). Brake for release, motor for retract.|
-|rc_op_mode|input| |mode: release, retract or idle|
-|rc_ctrl_mode|input| |trigger manual input or auto |
+|operation mode |mapped to rc_op_mode, let you switch between operation mode and auto mode  | |
+|auto|failsafe brake| | |
+| |reset | | |
+| | | | |
+|manual |failsafe | | |
+|       |speed control |mapped with rc_speed_ctrl | |
+|       |control the retraction mode |mapped with rc_ctrl_mode| |
+        
+
+## Interface set ups
+
+|name| type of signal (input/output)|port number|Set up |Comments|
+|---|---|---|---|---|
+|motor|output |enA on 5, in1, in2 on 4, 6 | ??????| in1, in2 control the direction| 
+|servo|output|9, 5V, GND| |Make sure that it's powered with a true 5V instead of just the microcontroller|
+|encoder|input|2, 3, 5V, GND| | read the ticks from encoder |
+|rc_failsafe|input|A2|HIGH: failsafe triggered, LOW: failsafe disengaged |instant brake, overwrite all controls. Used as failsafe|
+|rc_speed_ctrl|input|A1|Map a standard PWM 1000-2000 input linearly |speed controller (throttle). Brake for release, motor for retract.|
+|rc_op_mode|input|A3|HIGH: AUTO mode, LOW: Manual Mode |trigger manual input or auto|
+|rc_ctrl_mode|input|A4| LOW < IDLE, RETRACT, RELEASE < HIGH| mode: release, retract or idle|
 
 ### Driver modules
 
-#### Encoder
+#### Encoder (NOT UPDATED)
  
- 
- 
+Encoder module that were used as the input feedback  
+
 |name |return | parameter |description |
 |---|---|---|---|
 |encoder_reset |void |void | | hard reset all the encoder parameters 
@@ -34,9 +59,9 @@ The testing uses travis.
 
 See encoder at: https://www.pjrc.com/teensy/td_libs_Encoder.html
 
-#### Motor
+#### Motor (NOT UPDATED)
 
-We are planning to use motor mainly for retracting the rope. It has two actions: start and stop. 
+We are planning to use motor mainly for retracting the rope. It has two actions: start and stop. Although a linear controller is included, based on the max toque of the motor, having it to fully control the winch is difficult. 
 
 As a back up action to map the speed to motor control, we have Motor.run_at()
 
@@ -49,8 +74,7 @@ As a back up action to map the speed to motor control, we have Motor.run_at()
 |motor_run_at |void |float  |precent from 1 to 0 | 
 
 
-#### Servo
-
+#### Servo (NOT UPDATED)
 
 
 |name |return | parameter |description |
@@ -86,21 +110,31 @@ Follow this [guide](https://startingelectronics.org/tutorials/arduino/modules/OL
 
 
 
-## Set up
-platformio init --ide clion --board uno
-> This will start the project. uno is chosen here but feel free to change it later in [platofrmio.ini](./platformio.ini#13)
+## Set up and run project
+```bash
+git clone https://github.com/Rainerino/UAS-winch.git
+```
+
+if you dont have platformio installed: 
+```bash
+pip install -U platformio
+```
+To enable CLI mode, add this to /.bashrc or /.profile:
+```bash
+export PATH=$PATH:~/.platformio/penv/bin
+```
+
+Test run: 
+
+```bash
+pio -f -c clion run --target upload
+pio -f -c clion run  # just run
+```
 
 ## Development
 
 I set things up on Clion, but feel free to use Vscode. Sometimes Vscode is better, if all the button works. 
 
-## Operation
-
-> Note: after manual to auto switch, the mission will be reseted automatically
-
-### Control
-| | | | |
-|---|---|---|---|
 
 
-### run the project
+

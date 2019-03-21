@@ -2,13 +2,9 @@
 // Created by yiyi on 17/03/19.
 //
 
-/*
- * Driver module
- */
 #include <Ticker.h>
-#include "main.h"
 #include "Arduino.h"
-#include "../lib/UAS_drivers/UAS_driver.h"
+#include "UAS_drivers/UAS_driver.h"
 
 #define SERVO_PIN 9
 #define A_SIGNAL 2 //Pin number for encoder
@@ -60,7 +56,6 @@ Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at cert
 Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain rate
 
 
-
 void release(){
     if(driver.encoder_total_distance(uas_encoder) < altitude){
         driver.servo_release();
@@ -76,25 +71,28 @@ void retract(){
     //TODO
 }
 
+/**
+ * Interrupt function 1: update the speed measurement
+ */
 void calculate_speed(){
-    difference = driver.encoder_tick_diff(uas_encoder);
-
-    if (difference!= 0) {
-        driver.current_speed = uint16_t((difference * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / SPEED_DELTA_T)); // mm/s
-    }else{
-        // avoid 0 division
-        driver.current_speed = 0;
-    }
+    driver.encoder_update_current_speed(SPEED_DELTA_T, uas_encoder);
+    // Give out warning if the current speed exceeds the rated speed, that means encoder is likely to be
+    // missing steps and requires some restart or manual control.
     driver.encoder_valid(SPEED_DELTA_T);
 }
+
+/**
+ * Interrupt function 2: update rc inputs
+ */
 void rc_input_update(){
-    // channel updates
-    // update op_mode change
-//    noInterrupts();
+    //noInterrupts();
+
+    // update operation mode
     driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
     driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
     driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
 
+    // update failsafe control data
     driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH);
     driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
 
@@ -114,7 +112,9 @@ void rc_input_update(){
 
 }
 
-
+/**
+ * this is the compeition operation set up function. We seperated it so that testing codes are easier to add.
+ */
 void static main_operation_setup(){
     driver = UAS_driver();
     driver.attach_motor(enA, in1, in2);
@@ -133,11 +133,16 @@ void static main_operation_setup(){
     rc_update.start();
 }
 
+/**
+ * this is the compeition operation loop.
+ */
 void static main_operation_loop() {
+
     encoder_speed.update();
     rc_update.update();
 
-    if (false){
+    if (driver.rc_op_mode.mode == AUTO_MODE){
+        Serial.println("AUTO MODE IS NOT COMPLETED");
         // auto mode
         // when swtich from manual to release, add a reset
         if (driver.rc_op_mode.change){
@@ -156,7 +161,8 @@ void static main_operation_loop() {
             auto_mission_completed = true;
         }
         // manual mode
-    }else if (true){
+    }else if (driver.rc_op_mode.mode == AUTO_MODE){
+
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();
             driver.motor_stop();
@@ -175,40 +181,18 @@ void static main_operation_loop() {
     }
 
     driver.driver_test_message(uas_encoder);
+
     delay(LOOP_SPEED);
 }
 
 void setup() {
-    // main_operation_setup();
+
     main_operation_setup();
 }
 
 void loop() {
+
     main_operation_loop();
-
-}
-void test_rc_setup(){
-    driver.attach_servo(SERVO_PIN);
-    driver.servo_brake_range(0, 180);
-    driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
-    driver.rc_failsafe.pin = FAILSAFE_PIN;
-    driver.rc_ctrl_mode.pin = CTRL_MODE_PIN;
-    Serial.begin(9600);
-    rc_update.start();
-}
-void test_rc_loop() {
-    if (driver.rc_failsafe.trigger){
-        driver.servo_full_brake();
-    }else{
-        driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
-    }
-    rc_update.update();
-
-    Serial.println(driver.rc_failsafe.raw_value);
-    Serial.println(driver.rc_speed_ctrl.raw_value);
-    Serial.println(driver.rc_ctrl_mode.raw_value);
-    Serial.println(driver.rc_ctrl_mode.mode);
-    Serial.println("=============");
 
 }
 
