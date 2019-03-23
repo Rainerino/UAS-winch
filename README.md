@@ -116,6 +116,17 @@ git clone https://github.com/Rainerino/UAS-winch.git
 ```
 
 if you dont have platformio installed: 
+
+[Installation Guide](https://docs.platformio.org/en/latest/installation.html)
+
+- go to "Extension" on the left menu bar
+
+- search "platformio ide"
+
+- Let it install, it will take sometime
+
+- 
+
 ```bash
 pip install -U platformio
 ```
@@ -134,6 +145,19 @@ pio -f -c clion run  # just run
 ## Development
 
 I set things up on Clion, but feel free to use Vscode. Sometimes Vscode is better, if all the button works. 
+
+### Control design
+
+#### Releasing
+
+-
+- 
+
+#### Retracting
+
+- slow down the speed when approaches the drone. Use **Log** or inverse exp.
+- 
+- detect when the speed reaches 0.
 
 
 

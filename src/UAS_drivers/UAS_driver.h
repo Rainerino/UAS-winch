@@ -136,6 +136,11 @@ public:
      */
     void motor_start();
 
+    /**
+     *
+     * @param percent
+     */
+    void motor_run_at(uint16_t percent);
 
     /**=======================================================
     * Servo functions
@@ -174,7 +179,7 @@ public:
     void lcd_display_encoder_data(Encoder uas_encoder);
 
     /* ==================================  Drafting problem */
-    void motor_run_at(float percent);
+
     void motor_reverse_direction();
 
     void change_speed();

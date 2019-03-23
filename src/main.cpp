@@ -23,6 +23,9 @@
 #define RELEASE_MODE 1
 #define RETRACT_MODE 2
 
+/*
+ * Data type related constants
+ */
 const int LOOP_SPEED = 50; //ms updating at 1/50*10^3 = 20Hz
 const int SPEED_DELTA_T = 200; //ms
 const int RC_DELTA_T = 10; // ms
@@ -33,6 +36,10 @@ const int SERVO_RELEASE = 40;
 const int DESIRED_SPEED = 2000; //2m/s, 2000mm/s
 const int MOTOR_LOW = 100;
 const int MOTOR_HIGH = 255;
+
+
+
+
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
@@ -180,7 +187,8 @@ void static main_operation_loop() {
                 driver.motor_stop();
             }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
                 driver.servo_release();
-                driver.motor_start();
+//                driver.motor_start();
+                  driver.motor_run_at(driver.rc_speed_ctrl.precentage);
             }else{
                 driver.servo_slow_brake();
                 driver.motor_stop();
