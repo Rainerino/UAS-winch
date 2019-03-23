@@ -60,13 +60,10 @@ bool audo_retract_completed;
 
 
 uint16_t difference;
-<<<<<<< HEAD
 
-uint16_t current_altitude = 30000; // goes up to 65 meters
-=======
 uint16_t current_altitude = 30000; // goes up to 65 meters PLACE HOLDER
 uint16_t drone_altitude = 30000; // PLACE HOLDER
->>>>>>> 07b76dad2348cc05551a60dcdb8bf6b5af5592a3
+
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
@@ -84,13 +81,7 @@ void release(){
 }
 
 void retract(){
-<<<<<<< HEAD
-    // start with distance about 30,000 mm
-    driver.motor_run_at(static_cast<uint16_t>(log(1+ driver.encoder_total_distance(uas_encoder))/log(30) * 100.0));
 
-    if (driver.current_speed == 0){
-
-=======
     if(current_altitude < drone_altitude && (current_altitude < drone_altitude-3 || driver.current_speed == 0)){
         driver.servo_release();
         driver.motor_run_at(100* (1- log(current_altitude)/log(drone_altitude)));
@@ -98,7 +89,6 @@ void retract(){
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
         auto_mission_completed = true;
->>>>>>> 07b76dad2348cc05551a60dcdb8bf6b5af5592a3
     }
 }
 
