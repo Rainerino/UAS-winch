@@ -33,9 +33,11 @@ const int RC_DELTA_T = 10; // ms
 const int SERVO_BRAKE = 95;
 const int SERVO_RELEASE = 40;
 
-const int DESIRED_SPEED = 2000; //2m/s, 2000mm/s
+const int DESIRED_SPEED = 1500; //1.5m/s, 1500mm/s
 const int MOTOR_LOW = 100;
 const int MOTOR_HIGH = 255;
+
+const long DESIRED_DROP_ALTITUDE = 0.5;
 
 
 
@@ -51,12 +53,13 @@ void calculate_speed();
 void rc_input_update();
 
 bool auto_mission_completed;
-bool audo_release_completed;
+bool auto_release_completed;
 bool audo_retract_completed;
 
 
 uint16_t difference;
-uint16_t altitude = 30000; // goes up to 65 meters
+uint16_t current_altitude = 30000; // goes up to 65 meters
+uint16_t drone_altitude = 30000;
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
@@ -64,18 +67,24 @@ Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain
 
 
 void release(){
-    if(driver.encoder_total_distance(uas_encoder) < altitude){
-        driver.servo_release();
-        // speed controller goes here.
-        // a simple pid controller
-    } else{
+    if(current_altitude <= DESIRED_DROP_ALTITUDE){
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
-        audo_release_completed = true;
-    }
+        auto_release_completed = true;
+    } else {
+        driver.servo_brake_at(100* (1-log(current_altitude + DESIRED_DROP_ALTITUDE)/log(30+DESIRED_DROP_ALTITUDE) * driver.current_speed/DESIRED_SPEED));
+    }   
 }
+
 void retract(){
-    //TODO
+    if(current_altitude < drone_altitude ){
+        driver.servo_release();
+        driver.motor_run_at(100* (1- log(current_altitude)/log(drone_altitude)));
+    } else {
+        driver.servo_full_brake();
+        driver.encoder_reset(uas_encoder);
+        auto_mission_completed = true;
+    }
 }
 
 /**
@@ -104,7 +113,7 @@ void rc_input_update(){
     driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
 
     driver.rc_speed_ctrl.raw_value = pulseIn(driver.rc_speed_ctrl.pin, HIGH);
-    driver.rc_speed_ctrl.precentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 950, 2000, 0, 100));
+    driver.rc_speed_ctrl.percentage = uint16_t(map(driver.rc_speed_ctrl.raw_value, 950, 2000, 0, 100));
     //    Serial.println("CALLED");
     driver.rc_ctrl_mode.raw_value = pulseIn(driver.rc_ctrl_mode.pin, HIGH);
 
@@ -164,7 +173,7 @@ void static main_operation_loop() {
         }
 
         if (!auto_mission_completed){
-            if(!audo_release_completed) {
+            if(!auto_release_completed) {
                 release();
             }else if (!audo_retract_completed){
                 retract();
@@ -183,12 +192,12 @@ void static main_operation_loop() {
             driver.motor_stop();
         }else{
             if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
-                driver.servo_brake_at(driver.rc_speed_ctrl.precentage);
+                driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
                 driver.motor_stop();
             }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
                 driver.servo_release();
 //                driver.motor_start();
-                  driver.motor_run_at(driver.rc_speed_ctrl.precentage);
+                  driver.motor_run_at(driver.rc_speed_ctrl.percentage);
             }else{
                 driver.servo_slow_brake();
                 driver.motor_stop();
