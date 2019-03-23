@@ -58,8 +58,8 @@ bool audo_retract_completed;
 
 
 uint16_t difference;
-uint16_t current_altitude = 30000; // goes up to 65 meters
-uint16_t drone_altitude = 30000;
+uint16_t current_altitude = 30000; // goes up to 65 meters PLACE HOLDER
+uint16_t drone_altitude = 30000; // PLACE HOLDER
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
@@ -77,7 +77,7 @@ void release(){
 }
 
 void retract(){
-    if(current_altitude < drone_altitude ){
+    if(current_altitude < drone_altitude && (current_altitude < drone_altitude-3 || driver.current_speed == 0)){
         driver.servo_release();
         driver.motor_run_at(100* (1- log(current_altitude)/log(drone_altitude)));
     } else {
