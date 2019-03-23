@@ -103,7 +103,7 @@ public:
      * @param uas_encoder
      * @return
      */
-    uint16_t encoder_tick_diff(Encoder uas_encoder);
+    int32_t encoder_tick_diff(Encoder uas_encoder);
 
     /**
      * Update the current speed based on delta_t
@@ -171,7 +171,7 @@ public:
 
     void lcd_setup();
     void lcd_display_message(char* message);
-    void lcd_display_encoder_data();
+    void lcd_display_encoder_data(Encoder uas_encoder);
 
     /* ==================================  Drafting problem */
     void motor_run_at(float percent);

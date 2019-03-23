@@ -65,20 +65,19 @@ bool UAS_driver::encoder_valid(uint16_t delta_t){
 }
 
 void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_encoder){
-    auto difference = encoder_tick_diff(uas_encoder);
+    int32_t difference = encoder_tick_diff(uas_encoder);
 
     if (difference!= 0) {
-        current_speed = uint16_t((difference * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
+        current_speed = uint16_t((abs(difference) * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
     }else{
         // avoid 0 division
         current_speed = 0;
     }
 }
 
-
-uint16_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
+int32_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
-    auto difference = uint16_t(abs(encoder_cur_tick - encoder_prev_tick));
+    int32_t difference = uint16_t(abs(encoder_cur_tick - encoder_prev_tick));
     encoder_prev_tick = encoder_cur_tick;
     return difference;
 }
@@ -198,15 +197,17 @@ void UAS_driver::lcd_display_message(char *message) {
   // update display with all of the above graphics
   display.display();
 }
-void UAS_driver::lcd_display_encoder_data() {
+void UAS_driver::lcd_display_encoder_data(Encoder uas_encoder) {
   display.clearDisplay();
-  display.setTextSize(2);
+  display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(20,0);
+  display.setCursor(20, 0);
   display.print(String("tick:") + String(encoder_cur_tick, DEC));
-  display.setCursor(35, 0);
+  display.setCursor(20, 10);
   display.print(String("speed:") + String(current_speed, DEC));
   // update display with all of the above graphics
+  display.setCursor(20, 20);
+  display.print(String("distance:") + String(encoder_total_distance(uas_encoder), DEC));
   display.display();
 }
 

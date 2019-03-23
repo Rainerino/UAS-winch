@@ -189,7 +189,7 @@ void static main_operation_loop() {
     }
 
     driver.driver_test_message(uas_encoder);
-    driver.lcd_display_encoder_data();
+    driver.lcd_display_encoder_data(uas_encoder);
     delay(LOOP_SPEED);
 }
 

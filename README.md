@@ -7,12 +7,12 @@
 - figure out the direction of the motor
 - consider power on motor for releasing?
 - find a documentation tool, that is better than MARKDOWN LOL
-- finish LCD display driver
+- ~~finish LCD display driver~~
 
 ## Description
 
 This program is designed, implemented and tested for UAS's winch system. It's writen was platoformio on Clion and VSCode in c and c++.
-The testing uses travis.
+The testing **will**uses travis.
 
 ## Operation
 
@@ -33,13 +33,13 @@ The testing uses travis.
 
 |name| type of signal (input/output)|port number|Set up |Comments|
 |---|---|---|---|---|
-|motor|output |enA on 5, in1, in2 on 4, 6 | ??????| in1, in2 control the direction| 
-|servo|output|9, 5V, GND| |Make sure that it's powered with a true 5V instead of just the microcontroller|
-|encoder|input|2, 3, 5V, GND| | read the ticks from encoder |
-|rc_failsafe|input|A2|HIGH: failsafe triggered, LOW: failsafe disengaged |instant brake, overwrite all controls. Used as failsafe|
-|rc_speed_ctrl|input|A1|Map a standard PWM 1000-2000 input linearly |speed controller (throttle). Brake for release, motor for retract.|
-|rc_op_mode|input|A3|HIGH: AUTO mode, LOW: Manual Mode |trigger manual input or auto|
-|rc_ctrl_mode|input|A4| LOW < IDLE, RETRACT, RELEASE < HIGH| mode: release, retract or idle|
+|motor|output |enA on 14, in1, in2 on 10, 11 | ??????| in1, in2 control the direction| 
+|servo|output|7, 5V, GND| |Make sure that it's powered with a true 5V instead of just the microcontroller|
+|encoder|input|8, 9, 5V, GND| | read the ticks from encoder |
+|rc_failsafe|input|22|HIGH: failsafe triggered, LOW: failsafe disengaged |instant brake, overwrite all controls. Used as failsafe|
+|rc_speed_ctrl|input|23|Map a standard PWM 1000-2000 input linearly |speed controller (throttle). Brake for release, motor for retract.|
+|rc_op_mode|input|21|HIGH: AUTO mode, LOW: Manual Mode |trigger manual input or auto|
+|rc_ctrl_mode|input|20| LOW < IDLE, RETRACT, RELEASE < HIGH| mode: release, retract or idle|
 
 ### Driver modules
 
