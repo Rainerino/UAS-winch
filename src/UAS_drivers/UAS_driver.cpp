@@ -95,7 +95,11 @@ void UAS_driver::motor_start(){
     analogWrite(motor_pin, uint8_t(motor_high));
 }
 void UAS_driver::motor_run_at(uint16_t percent){
-    analogWrite(motor_pin, uint8_t( (motor_high - motor_low) * percent / 100.0 ));
+    auto signal = uint8_t( (motor_high - motor_low) * percent / 100.0 );
+    if (percent > 100){
+      signal = 100;
+    }
+    analogWrite(motor_pin, signal);
 }
 void UAS_driver::motor_reverse_direction(){
     motor_direction = !motor_direction;

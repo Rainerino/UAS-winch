@@ -41,6 +41,7 @@ const int MOTOR_HIGH = 255;
 
 
 
+
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
 UAS_driver driver;
@@ -55,8 +56,10 @@ bool audo_release_completed;
 bool audo_retract_completed;
 
 
+
 uint16_t difference;
-uint16_t altitude = 30000; // goes up to 65 meters
+
+uint16_t current_altitude = 30000; // goes up to 65 meters
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
@@ -75,7 +78,12 @@ void release(){
     }
 }
 void retract(){
-    //TODO
+    // start with distance about 30,000 mm
+    driver.motor_run_at(static_cast<uint16_t>(log(1+ driver.encoder_total_distance(uas_encoder))/log(30) * 100.0));
+
+    if (driver.current_speed == 0){
+
+    }
 }
 
 /**

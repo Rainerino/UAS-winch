@@ -152,7 +152,15 @@ public:
      * @param brake_percent
      */
     void servo_brake_at(uint16_t brake_percent);
+
+    /**
+     *
+     */
     void servo_release();
+
+    /**
+     *
+     */
     void servo_full_brake();
 
     void servo_slow_brake();
