@@ -4,7 +4,10 @@
 
 
 #include "./UAS_driver.h"
+#include "UAS_driver.h"
 
+#define OLED_ADDR   0x3C
+Adafruit_SSD1306 display(-1);
 
 UAS_driver::UAS_driver() {
     encoder_invalid = false;
@@ -15,6 +18,16 @@ UAS_driver::UAS_driver() {
     current_speed = 0;
 
 }
+void UAS_driver::setup_pinMode(){
+    pinMode(motor_pin, OUTPUT);
+    pinMode(motor_in1, OUTPUT);
+    pinMode(motor_in2, OUTPUT);
+    pinMode(rc_op_mode.pin, INPUT);
+    pinMode(rc_failsafe.pin, INPUT);
+    pinMode(rc_speed_ctrl.pin, INPUT);
+    pinMode(rc_ctrl_mode.pin, INPUT);
+}
+
 void UAS_driver::attach_motor(uint8_t pin, uint8_t in1, uint8_t in2){
     motor_pin = pin;
     motor_in1 = in1;
@@ -154,5 +167,46 @@ void UAS_driver::driver_test_message(Encoder uas_encoder){
 
     Serial.println("============================");
     Serial.println();
+}
+void UAS_driver::lcd_setup() {
+
+  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+  display.clearDisplay();
+  display.display();
+
+  // display a pixel in each corner of the screen
+  display.drawPixel(0, 0, WHITE);
+  display.drawPixel(127, 0, WHITE);
+  display.drawPixel(0, 31, WHITE);
+  display.drawPixel(127, 31, WHITE);
+
+  // display a line of text
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(27,15);
+  display.print("Hello, world!");
+
+  // update display with all of the above graphics
+  display.display();
+}
+void UAS_driver::lcd_display_message(char *message) {
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(27,15);
+  display.print(message);
+
+  // update display with all of the above graphics
+  display.display();
+}
+void UAS_driver::lcd_display_encoder_data() {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(20,0);
+  display.print(String("tick:") + String(encoder_cur_tick, DEC));
+  display.setCursor(35, 0);
+  display.print(String("speed:") + String(current_speed, DEC));
+  // update display with all of the above graphics
+  display.display();
 }
 

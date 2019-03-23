@@ -6,16 +6,16 @@
 #include "Arduino.h"
 #include "UAS_drivers/UAS_driver.h"
 
-#define SERVO_PIN 9
-#define A_SIGNAL 2 //Pin number for encoder
-#define B_SIGNAL 3 //Pin munber for encoder
-#define enA 5
-#define in1 4
-#define in2 6
-#define SPEED_CTRL_PIN A1
-#define FAILSAFE_PIN A2
-#define OP_MODE_PIN A3
-#define CTRL_MODE_PIN A4
+#define SERVO_PIN 7
+#define A_SIGNAL 8 //Pin number for encoder
+#define B_SIGNAL 9 //Pin munber for encoder
+#define enA 14
+#define in1 10
+#define in2 11
+#define SPEED_CTRL_PIN 23
+#define FAILSAFE_PIN 22
+#define OP_MODE_PIN 21
+#define CTRL_MODE_PIN 20
 
 #define MANUAL_MODE 0
 #define AUTO_MODE 1
@@ -120,7 +120,9 @@ void static main_operation_setup(){
     driver.attach_motor(enA, in1, in2);
     driver.attach_servo(SERVO_PIN);
     auto_mission_completed = false;
+    
     Serial.begin(9600);
+
     driver.servo_brake_range(SERVO_RELEASE, SERVO_BRAKE);
     driver.rc_ctrl_mode.pin = CTRL_MODE_PIN;
     driver.rc_op_mode.pin = OP_MODE_PIN;
@@ -129,6 +131,9 @@ void static main_operation_setup(){
     driver.motor_set_range(MOTOR_LOW, MOTOR_HIGH);
 
     //set up input and output pins
+    driver.setup_pinMode();
+    driver.lcd_setup();
+    
     encoder_speed.start();
     rc_update.start();
 }
@@ -141,7 +146,8 @@ void static main_operation_loop() {
     encoder_speed.update();
     rc_update.update();
 
-    if (driver.rc_op_mode.mode == AUTO_MODE){
+    // if (driver.rc_op_mode.mode == AUTO_MODE){
+    if (false){
         Serial.println("AUTO MODE IS NOT COMPLETED");
         // auto mode
         // when swtich from manual to release, add a reset
@@ -161,7 +167,9 @@ void static main_operation_loop() {
             auto_mission_completed = true;
         }
         // manual mode
-    }else if (driver.rc_op_mode.mode == AUTO_MODE){
+    // }else if (driver.rc_op_mode.mode == AUTO_MODE){
+     }else if (true
+     ){   
 
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();
@@ -181,7 +189,7 @@ void static main_operation_loop() {
     }
 
     driver.driver_test_message(uas_encoder);
-
+    driver.lcd_display_encoder_data();
     delay(LOOP_SPEED);
 }
 

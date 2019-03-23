@@ -14,6 +14,9 @@
 #include "math.h"
 
 
+
+
+
 const uint16_t ENCODER_TICK_PER_RES = 81; // ticks.
 const uint16_t DRUM_R = 35; // mm
 const uint8_t  DRUM_2_ENCODER_GEAR_RATIO_X_10 = 14;
@@ -42,6 +45,9 @@ public:
      */
 
     UAS_driver();
+
+
+    void setup_pinMode();
 
     /**
      * Set up and change the motor pins.
@@ -178,6 +184,7 @@ public:
     uint16_t encoder_max_rpm;
     uint32_t encoder_cur_tick;
     bool encoder_invalid;
+
 
 private:
     uint32_t encoder_prev_tick;
