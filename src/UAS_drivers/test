@@ -1,9 +1,0 @@
-import dronekit
-
-v = //conection
-
-while(True):
-    //check if gps data is aviable
-    
-    socket from = to
-    time.delay(number_)
