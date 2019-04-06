@@ -42,7 +42,7 @@ const long DESIRED_DROP_ALTITUDE = 0.5;
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
-UAS_driver driver;
+UAS_driver driver =  UAS_driver();
 
 void release();
 void retract();
@@ -133,7 +133,6 @@ void rc_input_update(){
  * this is the compeition operation set up function. We seperated it so that testing codes are easier to add.
  */
 void static main_operation_setup(){
-    driver = UAS_driver();
     driver.attach_motor(enA, in1, in2);
     driver.attach_servo(SERVO_PIN);
     auto_mission_completed = false;
@@ -160,56 +159,52 @@ void static main_operation_setup(){
  */
 void static main_operation_loop() {
 
-    // encoder_speed.update();
-    // rc_update.update();
+    encoder_speed.update();
+    rc_update.update();
 
-    // if (driver.rc_op_mode.mode == AUTO_MODE){
-    // if (false){
-    //     Serial.println("AUTO MODE IS NOT COMPLETED");
-    //     // auto mode
-    //     // when swtich from manual to release, add a reset
-    //     if (driver.rc_op_mode.change){
-    //         driver.encoder_reset(uas_encoder);
-    //         driver.rc_op_mode.change = false;
-    //     }
+    if (driver.rc_op_mode.mode == AUTO_MODE){
+        Serial.println("AUTO MODE IS NOT COMPLETED");
+        // auto mode
+        // when swtich from manual to release, add a reset
+        if (driver.rc_op_mode.change){
+            driver.encoder_reset(uas_encoder);
+            driver.rc_op_mode.change = false;
+        }
 
-    //     if (!auto_mission_completed){
-    //         if(!auto_release_completed) {
-    //             release();
-    //         }else if (!audo_retract_completed){
-    //             retract();
-    //         }else{
-    //             // clean up function. mission is completed, we need to go to the idle mode
-    //         }
-    //         auto_mission_completed = true;
-    //     }
-        // manual mode
-    // }else if (driver.rc_op_mode.mode == AUTO_MODE){
-//      }else if (true){   
-
-//         if (driver.rc_failsafe.trigger){
-//             driver.servo_full_brake();
-//             driver.motor_stop();
-//         }else{
-//             if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
-//                 driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
-//                 driver.motor_stop();
-//             }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
-//                 driver.servo_release();
-// //                driver.motor_start();
-//                   driver.motor_run_at(driver.rc_speed_ctrl.percentage);
-//             }else{
-//                 driver.servo_slow_brake();
-//                 driver.motor_stop();
-//             }
-//         }
-//     }
+        if (!auto_mission_completed){
+            if(!auto_release_completed) {
+                release();
+            }else if (!audo_retract_completed){
+                retract();
+            }else{
+                // clean up function. mission is completed, we need to go to the idle mode
+            }
+            auto_mission_completed = true;
+        }
+    //     manual mode
+    }else if (driver.rc_op_mode.mode == AUTO_MODE){
+        if (driver.rc_failsafe.trigger){
+            driver.servo_full_brake();
+            driver.motor_stop();
+        }else{
+            if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
+                driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
+                driver.motor_stop();
+            }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
+                driver.servo_release();
+//                driver.motor_start();
+                  driver.motor_run_at(driver.rc_speed_ctrl.percentage);
+            }else{
+                driver.servo_slow_brake();
+                driver.motor_stop();
+            }
+        }
+    }
 
     driver.driver_test_message(uas_encoder);
-    // Serial.print("??");
-    // driver.lcd_display_encoder_data(uas_encoder);
-
-    // delay(LOOP_SPEED);
+    Serial.println(driver.rc_speed_ctrl.raw_value);
+    driver.lcd_display_encoder_data(uas_encoder);
+    delay(LOOP_SPEED);
 }
 
 void setup() {
