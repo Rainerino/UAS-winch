@@ -170,6 +170,7 @@ void UAS_driver::driver_test_message(Encoder uas_encoder){
     Serial.println(rc_ctrl_mode.raw_value);
     Serial.print("op: ");
     Serial.println(rc_op_mode.raw_value);
+    Serial.println(rc_op_mode.mode);
 
     Serial.println("============================");
     Serial.println();

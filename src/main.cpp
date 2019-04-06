@@ -103,12 +103,13 @@ void calculate_speed(){
  */
 void rc_input_update(){
     //noInterrupts();
-
     // update operation mode
     driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
-    driver.rc_op_mode.change = (driver.rc_op_mode.raw_value > 1500) ^ (driver.rc_op_mode.mode == 1); // xor, only if there is a mode change
-    driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
-
+    driver.rc_op_mode.change = driver.rc_op_mode.raw_value > 1700 ; // xor, only if there is a mode change
+    // driver.rc_op_mode.mode = uint8_t(driver.rc_op_mode.raw_value > 1500 ? AUTO_MODE : MANUAL_MODE);
+    if (driver.rc_op_mode.change){
+        driver.rc_op_mode.mode = driver.rc_op_mode.mode == AUTO_MODE ? MANUAL_MODE : AUTO_MODE;
+    }
     // update failsafe control data
     driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH);
     driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
@@ -163,15 +164,14 @@ void static main_operation_loop() {
     rc_update.update();
 
     if (driver.rc_op_mode.mode == AUTO_MODE){
+
         Serial.println("AUTO MODE IS NOT COMPLETED");
         // auto mode
         // when swtich from manual to release, add a reset
         if (driver.rc_op_mode.change){
             driver.encoder_reset(uas_encoder);
             driver.rc_op_mode.change = false;
-        }
-
-        if (!auto_mission_completed){
+        }else if (!auto_mission_completed){
             if(!auto_release_completed) {
                 release();
             }else if (!audo_retract_completed){
@@ -182,7 +182,8 @@ void static main_operation_loop() {
             auto_mission_completed = true;
         }
     //     manual mode
-    }else if (driver.rc_op_mode.mode == AUTO_MODE){
+    }else if (driver.rc_op_mode.mode == MANUAL_MODE){
+
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();
             driver.motor_stop();
@@ -202,7 +203,6 @@ void static main_operation_loop() {
     }
 
     driver.driver_test_message(uas_encoder);
-    Serial.println(driver.rc_speed_ctrl.raw_value);
     driver.lcd_display_encoder_data(uas_encoder);
     delay(LOOP_SPEED);
 }
