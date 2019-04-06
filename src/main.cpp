@@ -40,8 +40,6 @@ const int MOTOR_HIGH = 255;
 const long DESIRED_DROP_ALTITUDE = 0.5;
 
 
-
-
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
 UAS_driver driver;
@@ -146,6 +144,7 @@ void static main_operation_setup(){
     driver.rc_op_mode.pin = OP_MODE_PIN;
     driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
     driver.rc_failsafe.pin = FAILSAFE_PIN;
+
     driver.motor_set_range(MOTOR_LOW, MOTOR_HIGH);
 
     //set up input and output pins
@@ -161,54 +160,56 @@ void static main_operation_setup(){
  */
 void static main_operation_loop() {
 
-    encoder_speed.update();
-    rc_update.update();
+    // encoder_speed.update();
+    // rc_update.update();
 
     // if (driver.rc_op_mode.mode == AUTO_MODE){
-    if (false){
-        Serial.println("AUTO MODE IS NOT COMPLETED");
-        // auto mode
-        // when swtich from manual to release, add a reset
-        if (driver.rc_op_mode.change){
-            driver.encoder_reset(uas_encoder);
-            driver.rc_op_mode.change = false;
-        }
+    // if (false){
+    //     Serial.println("AUTO MODE IS NOT COMPLETED");
+    //     // auto mode
+    //     // when swtich from manual to release, add a reset
+    //     if (driver.rc_op_mode.change){
+    //         driver.encoder_reset(uas_encoder);
+    //         driver.rc_op_mode.change = false;
+    //     }
 
-        if (!auto_mission_completed){
-            if(!auto_release_completed) {
-                release();
-            }else if (!audo_retract_completed){
-                retract();
-            }else{
-                // clean up function. mission is completed, we need to go to the idle mode
-            }
-            auto_mission_completed = true;
-        }
+    //     if (!auto_mission_completed){
+    //         if(!auto_release_completed) {
+    //             release();
+    //         }else if (!audo_retract_completed){
+    //             retract();
+    //         }else{
+    //             // clean up function. mission is completed, we need to go to the idle mode
+    //         }
+    //         auto_mission_completed = true;
+    //     }
         // manual mode
     // }else if (driver.rc_op_mode.mode == AUTO_MODE){
-     }else if (true){   
+//      }else if (true){   
 
-        if (driver.rc_failsafe.trigger){
-            driver.servo_full_brake();
-            driver.motor_stop();
-        }else{
-            if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
-                driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
-                driver.motor_stop();
-            }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
-                driver.servo_release();
-//                driver.motor_start();
-                  driver.motor_run_at(driver.rc_speed_ctrl.percentage);
-            }else{
-                driver.servo_slow_brake();
-                driver.motor_stop();
-            }
-        }
-    }
+//         if (driver.rc_failsafe.trigger){
+//             driver.servo_full_brake();
+//             driver.motor_stop();
+//         }else{
+//             if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
+//                 driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
+//                 driver.motor_stop();
+//             }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
+//                 driver.servo_release();
+// //                driver.motor_start();
+//                   driver.motor_run_at(driver.rc_speed_ctrl.percentage);
+//             }else{
+//                 driver.servo_slow_brake();
+//                 driver.motor_stop();
+//             }
+//         }
+//     }
 
     driver.driver_test_message(uas_encoder);
-    driver.lcd_display_encoder_data(uas_encoder);
-    delay(LOOP_SPEED);
+    // Serial.print("??");
+    // driver.lcd_display_encoder_data(uas_encoder);
+
+    // delay(LOOP_SPEED);
 }
 
 void setup() {
@@ -218,6 +219,5 @@ void setup() {
 void loop() {
 
     main_operation_loop();
-
 }
 

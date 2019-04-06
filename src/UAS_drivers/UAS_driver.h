@@ -14,9 +14,6 @@
 #include "math.h"
 
 
-
-
-
 const uint16_t ENCODER_TICK_PER_RES = 81; // ticks.
 const uint16_t DRUM_R = 35; // mm
 const uint8_t  DRUM_2_ENCODER_GEAR_RATIO_X_10 = 14;
