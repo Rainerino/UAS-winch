@@ -26,6 +26,8 @@ void UAS_driver::setup_pinMode(){
     pinMode(rc_failsafe.pin, INPUT);
     pinMode(rc_speed_ctrl.pin, INPUT);
     pinMode(rc_ctrl_mode.pin, INPUT);
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH);
 }
 
 void UAS_driver::attach_motor(uint8_t pin, uint8_t in1, uint8_t in2){

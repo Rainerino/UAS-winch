@@ -42,8 +42,6 @@ const long DESIRED_DROP_ALTITUDE = 0.5;
 
 
 
-
-
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
 UAS_driver driver;
@@ -143,7 +141,6 @@ void static main_operation_setup(){
     auto_mission_completed = false;
     
     Serial.begin(9600);
-
     driver.servo_brake_range(SERVO_RELEASE, SERVO_BRAKE);
     driver.rc_ctrl_mode.pin = CTRL_MODE_PIN;
     driver.rc_op_mode.pin = OP_MODE_PIN;
@@ -189,8 +186,7 @@ void static main_operation_loop() {
         }
         // manual mode
     // }else if (driver.rc_op_mode.mode == AUTO_MODE){
-     }else if (true
-     ){   
+     }else if (true){   
 
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();
