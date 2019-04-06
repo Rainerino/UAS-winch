@@ -6,12 +6,12 @@
 #include "Arduino.h"
 #include "UAS_drivers/UAS_driver.h"
 
-#define SERVO_PIN 7
-#define A_SIGNAL 8 //Pin number for encoder
-#define B_SIGNAL 9 //Pin munber for encoder
-#define enA 14
-#define in1 10
-#define in2 11
+#define SERVO_PIN 2
+#define A_SIGNAL 3 //Pin number for encoder
+#define B_SIGNAL 4 //Pin munber for encoder
+// #define enA 14
+#define in1 5
+#define in2 6
 #define SPEED_CTRL_PIN 23
 #define FAILSAFE_PIN 22
 #define OP_MODE_PIN 21
@@ -34,6 +34,7 @@ const int SERVO_BRAKE = 95;
 const int SERVO_RELEASE = 40;
 
 const int DESIRED_SPEED = 1500; //1.5m/s, 1500mm/s
+
 const int MOTOR_LOW = 100;
 const int MOTOR_HIGH = 255;
 
@@ -134,7 +135,7 @@ void rc_input_update(){
  * this is the compeition operation set up function. We seperated it so that testing codes are easier to add.
  */
 void static main_operation_setup(){
-    driver.attach_motor(enA, in1, in2);
+    driver.attach_motor(in1, in2);
     driver.attach_servo(SERVO_PIN);
     auto_mission_completed = false;
     

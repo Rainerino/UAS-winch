@@ -12,17 +12,15 @@ Adafruit_SSD1306 display(-1);
 UAS_driver::UAS_driver() {
     encoder_invalid = false;
     encoder_max_rpm = 450;
-    motor_direction = true;
+    motor_direction = false;
     encoder_prev_tick = 0;
     encoder_cur_tick = 0;
     current_speed = 0;
-    
-
 }
 void UAS_driver::setup_pinMode(){
-    pinMode(motor_pin, OUTPUT);
     pinMode(motor_in1, OUTPUT);
     pinMode(motor_in2, OUTPUT);
+
     pinMode(rc_op_mode.pin, INPUT);
     pinMode(rc_failsafe.pin, INPUT);
     pinMode(rc_speed_ctrl.pin, INPUT);
@@ -31,20 +29,21 @@ void UAS_driver::setup_pinMode(){
     digitalWrite(13, HIGH);
 }
 
-void UAS_driver::attach_motor(uint8_t pin, uint8_t in1, uint8_t in2){
-    motor_pin = pin;
+void UAS_driver::attach_motor( uint8_t in1, uint8_t in2){
     motor_in1 = in1;
     motor_in2 = in2;
 
-    pinMode(pin, OUTPUT);
     pinMode(in1, OUTPUT);
     pinMode(in2, OUTPUT);
+
     if (motor_direction){
-        digitalWrite(in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
-        digitalWrite(in2, LOW); //HIGH if releasing the rope, LOW if realing the rope
+        // digitalWrite(in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
+        digitalWrite(motor_in1, LOW); //HIGH if releasing the rope, LOW if realing the rope
+        motor_pin = in1;
     }else{
-        digitalWrite(in1, LOW); //LOW if releasing the rope, HIGH if realing the rope
-        digitalWrite(in2, HIGH); //HIGH if releasing the rope, LOW if realing the rope
+        digitalWrite(motor_in2, LOW); //LOW if releasing the rope, HIGH if realing the rope
+        motor_pin = in2;
+        // digitalWrite(in2, HIGH); //HIGH if releasing the rope, LOW if realing the rope
     }
 
 }
@@ -88,11 +87,13 @@ int32_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
 void UAS_driver::motor_set_range(uint16_t low, uint16_t high){
     motor_high = high;
     motor_low = low;
-    digitalWrite(motor_in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
-    digitalWrite(motor_in2, LOW); //HIGH if releasing the rope, LOW if realing the rope
+    // digitalWrite(motor_in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
+    // digitalWrite(motor_in2, LOW); //HIGH if releasing the rope, LOW if realing the rope
 }
 void UAS_driver::motor_stop(){
-    analogWrite( motor_pin, 0);
+    // analogWrite( motor_pin, 0);
+    digitalWrite(motor_in1, LOW);
+    digitalWrite(motor_in2, LOW);
 }
 void UAS_driver::motor_start(){
     analogWrite(motor_pin, uint8_t(motor_high));
@@ -107,11 +108,13 @@ void UAS_driver::motor_run_at(uint16_t percent){
 void UAS_driver::motor_reverse_direction(){
     motor_direction = !motor_direction;
     if (motor_direction){
-        digitalWrite(motor_in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
+        // digitalWrite(in1, HIGH); //LOW if releasing the rope, HIGH if realing the rope
         digitalWrite(motor_in2, LOW); //HIGH if releasing the rope, LOW if realing the rope
+        motor_pin = motor_in1;
     }else{
-        digitalWrite(motor_in2, LOW); //LOW if releasing the rope, HIGH if realing the rope
-        digitalWrite(motor_in1, HIGH); //HIGH if releasing the rope, LOW if realing the rope
+        digitalWrite(motor_in1, LOW); //LOW if releasing the rope, HIGH if realing the rope
+        motor_pin = motor_in2;
+        // digitalWrite(in2, HIGH); //HIGH if releasing the rope, LOW if realing the rope
     }
 }
 

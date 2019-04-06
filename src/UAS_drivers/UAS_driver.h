@@ -53,7 +53,7 @@ public:
      * @param in1
      * @param in2
      */
-    void attach_motor(uint8_t motor_pin,uint8_t in1, uint8_t in2);
+    void attach_motor(uint8_t in1, uint8_t in2);
 
     /**
      * Set up and attach the servo pin. Can be change at anytime.
@@ -200,9 +200,9 @@ private:
     uint32_t encoder_prev_tick;
     uint16_t motor_low;
     uint16_t motor_high;
-    uint8_t motor_pin;
     uint8_t motor_in1;
     uint8_t motor_in2;
+    uint8_t motor_pin;
 
     bool motor_direction;
 
