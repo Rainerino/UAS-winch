@@ -212,7 +212,6 @@ void static main_operation_loop() {
 }
 
 void setup() {
-
     main_operation_setup();
 }
 
