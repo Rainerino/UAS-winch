@@ -44,6 +44,8 @@ const long ALTITUDE_ERROR = 0.1;
 
 const int DEATTACHMENT_TIME = 5000;
 
+const int UAV_DISPLACMENT = 200;
+
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
 UAS_driver driver =  UAS_driver();
@@ -125,9 +127,16 @@ void calculate_speed(){
 }
 
 /**
+ * Update altitude of the rover
+ */
+void update_current_altitude(){
+    current_altitude = drone_altitude - UAV_DISPLACMENT + driver.encoder_distance(uas_encoder);
+}
+
+/**
  * Interrupt function 2: update rc inputs
  */
-void rc_input_update(){
+void rc_input_update(){                         //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE -Yekta
     //noInterrupts();
     // update operation mode
     driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
@@ -192,6 +201,7 @@ void static main_operation_loop() {
 
     encoder_speed.update();
     rc_update.update();
+    update_current_altitude();
 
     if (driver.rc_op_mode.mode == AUTO_MODE){
 

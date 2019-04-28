@@ -89,6 +89,13 @@ public:
     uint32_t encoder_total_distance(Encoder uas_encoder);
 
     /**
+    *
+    * @param uas_encoder
+    * @return
+    */
+    int UAS_driver::encoder_distance(Encoder uas_encoder);
+
+    /**
      *
      * @param delta_t
      * @return
@@ -193,6 +200,7 @@ public:
     uint16_t current_speed;
     uint16_t encoder_max_rpm;
     uint32_t encoder_cur_tick;
+    int encoder_cur_tick_int;
     bool encoder_invalid;
 
 

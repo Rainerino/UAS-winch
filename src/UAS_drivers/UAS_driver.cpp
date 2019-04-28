@@ -15,6 +15,7 @@ UAS_driver::UAS_driver() {
     motor_direction = false;
     encoder_prev_tick = 0;
     encoder_cur_tick = 0;
+    encoder_cur_tick_int = 0;
     current_speed = 0;
 }
 void UAS_driver::setup_pinMode(){
@@ -59,6 +60,12 @@ uint32_t UAS_driver::encoder_total_distance(Encoder uas_encoder){
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
     return uint32_t(encoder_cur_tick * ENCODER_MM_PER_TICK_X_1000 / 1000.0);
 }
+
+int UAS_driver::encoder_distance(Encoder uas_encoder){
+    encoder_cur_tick_int = int(uas_encoder.read());
+    return int(encoder_cur_tick * ENCODER_MM_PER_TICK_X_1000 / 1000.0);
+}
+
 
 bool UAS_driver::encoder_valid(uint16_t delta_t){
     // rpm -> rps -> tps -> mm ps -> mmps * s/s
