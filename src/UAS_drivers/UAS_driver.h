@@ -93,7 +93,7 @@ public:
     * @param uas_encoder
     * @return
     */
-    int UAS_driver::encoder_distance(Encoder uas_encoder);
+    int encoder_distance(Encoder uas_encoder);
 
     /**
      *
