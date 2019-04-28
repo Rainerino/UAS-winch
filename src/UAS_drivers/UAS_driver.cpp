@@ -25,8 +25,8 @@ void UAS_driver::setup_pinMode(){
     pinMode(rc_failsafe.pin, INPUT);
     pinMode(rc_speed_ctrl.pin, INPUT);
     pinMode(rc_ctrl_mode.pin, INPUT);
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
+    pinMode(13, OUTPUT);                    //WHAT ARE THESE -Yekta
+    digitalWrite(13, HIGH);                 //WHAT ARE THESE -Yekta
 }
 
 void UAS_driver::attach_motor( uint8_t in1, uint8_t in2){
@@ -123,8 +123,9 @@ void UAS_driver::servo_brake_range(uint16_t low, uint16_t high){
     servo_low_brake_angle = low;
     servo_high_brake_angle = high;
 }
-void UAS_driver::servo_brake_at(uint16_t brake_precent){
-    uas_servo.write(static_cast<int>(map(brake_precent , 0, 100, servo_low_brake_angle, servo_high_brake_angle)));
+void UAS_driver::servo_brake_at(uint16_t brake_percent){
+    if(brake_percent < 0){brake_percent = 0;}
+    uas_servo.write(static_cast<int>(map(brake_percent , 0, 100, servo_low_brake_angle, servo_high_brake_angle)));
     delayMicroseconds(SERVO_DELAY);
 }
 void UAS_driver::servo_release(){

@@ -40,8 +40,9 @@ const int MOTOR_HIGH = 255;
 
 const long DESIRED_DROP_ALTITUDE = 0.5;
 
-const float ALTITUDE_ERROR = 0.1;
+const long ALTITUDE_ERROR = 0.1;
 
+const int DEATTACHMENT_TIME = 5000;
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
@@ -54,7 +55,8 @@ void rc_input_update();
 
 bool auto_mission_completed;
 bool auto_release_completed;
-bool audo_retract_completed;
+bool auto_deattachment_completed;
+bool auto_retract_completed;
 
 
 
@@ -69,25 +71,46 @@ Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at cert
 Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain rate
 
 
+
+/**
+ * Realeasing the rope and controlling its speed to lower the UGV to the DESIRED_DROP_ALTITUDE.
+ */
 void release(){
     if(current_altitude <= DESIRED_DROP_ALTITUDE){
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
         auto_release_completed = true;
     } else {
-        driver.servo_brake_at(100* (1-log(current_altitude + DESIRED_DROP_ALTITUDE)/log(30+DESIRED_DROP_ALTITUDE) * driver.current_speed/DESIRED_SPEED));
+        //100 because using percentage
+        //+1 beacue log(<1) is negative
+        driver.servo_brake_at(100* (1-log(current_altitude - DESIRED_DROP_ALTITUDE+1)/log(30-DESIRED_DROP_ALTITUDE+1)));
     }   
 }
 
+/**
+ * Waiting for the UGV to de-attach.
+ */
+void deattach(){
+    delay(DEATTACHMENT_TIME); //Wait Time
+    auto_deattachment_completed = true;
+}
+
+/**
+ * Retract the rope after the UGV is de-attached.
+ */
 void retract(){
 
-    if(current_altitude < (drone_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > drone_altitude(1-ALTITUDE_ERROR) || driver.current_speed == 0)){
+    //Two conditions for retracting the rope:
+    //Current altitude is less than the drone altitude wirth error
+    //The rope is really close to the drone or the rope already reached the drum and can not move (currrent speed = 0)
+    if(current_altitude < (drone_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > drone_altitude*(1-ALTITUDE_ERROR) && driver.current_speed == 0)){
         driver.servo_release();
+        //altitude +1 because log(<1) is negative
         driver.motor_run_at(100* (1- log(current_altitude+1)/log(drone_altitude+1)));
     } else {
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
-        auto_mission_completed = true;
+        auto_retract_completed = true;
     }
 }
 
@@ -130,7 +153,6 @@ void rc_input_update(){
         driver.rc_ctrl_mode.mode = RETRACT_MODE; // mid is retract
     }
 //    interrupts();
-
 }
 
 /**
@@ -147,6 +169,11 @@ void static main_operation_setup(){
     driver.rc_op_mode.pin = OP_MODE_PIN;
     driver.rc_speed_ctrl.pin = SPEED_CTRL_PIN;
     driver.rc_failsafe.pin = FAILSAFE_PIN;
+
+    auto_mission_completed = false;
+    auto_release_completed = false;
+    auto_deattachment_completed = false;
+    auto_retract_completed = false;
 
     driver.motor_set_range(MOTOR_LOW, MOTOR_HIGH);
 
@@ -177,7 +204,9 @@ void static main_operation_loop() {
         }else if (!auto_mission_completed){
             if(!auto_release_completed) {
                 release();
-            }else if (!audo_retract_completed){
+            }else if (!auto_deattachment_completed){
+                deattach();
+            }else if (!auto_retract_completed){
                 retract();
             }else{
                 // clean up function. mission is completed, we need to go to the idle mode
