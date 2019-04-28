@@ -12,9 +12,9 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "/home/yiyi/Documents/UAS-winch/.pioenvs/teensy35/firmware.elf",
-            "toolchainBinDir": "/home/yiyi/.platformio/packages/toolchain-gccarmnoneeabi/bin",
-            "svdPath": "/home/yiyi/.platformio/platforms/teensy/misc/svd/MK64F12.svd",
+            "executable": "/Users/yektaataozden/Documents/UAS-winch/.pioenvs/teensy35/firmware.elf",
+            "toolchainBinDir": "/Users/yektaataozden/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "svdPath": "/Users/yektaataozden/.platformio/platforms/teensy/misc/svd/MK64F12.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug"
@@ -25,9 +25,9 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "/home/yiyi/Documents/UAS-winch/.pioenvs/teensy35/firmware.elf",
-            "toolchainBinDir": "/home/yiyi/.platformio/packages/toolchain-gccarmnoneeabi/bin",
-            "svdPath": "/home/yiyi/.platformio/platforms/teensy/misc/svd/MK64F12.svd",
+            "executable": "/Users/yektaataozden/Documents/UAS-winch/.pioenvs/teensy35/firmware.elf",
+            "toolchainBinDir": "/Users/yektaataozden/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "svdPath": "/Users/yektaataozden/.platformio/platforms/teensy/misc/svd/MK64F12.svd",
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

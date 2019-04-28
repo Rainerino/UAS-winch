@@ -40,6 +40,8 @@ const int MOTOR_HIGH = 255;
 
 const long DESIRED_DROP_ALTITUDE = 0.5;
 
+const float ALTITUDE_ERROR = 0.1;
+
 
 Encoder uas_encoder(A_SIGNAL,B_SIGNAL);
 
@@ -79,9 +81,9 @@ void release(){
 
 void retract(){
 
-    if(current_altitude < drone_altitude && (current_altitude < drone_altitude-3 || driver.current_speed == 0)){
+    if(current_altitude < (drone_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > drone_altitude(1-ALTITUDE_ERROR) || driver.current_speed == 0)){
         driver.servo_release();
-        driver.motor_run_at(100* (1- log(current_altitude)/log(drone_altitude)));
+        driver.motor_run_at(100* (1- log(current_altitude+1)/log(drone_altitude+1)));
     } else {
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
