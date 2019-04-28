@@ -65,7 +65,7 @@ bool auto_retract_completed;
 uint16_t difference;
 
 uint16_t current_altitude = 30000; // goes up to 65 meters PLACE HOLDER
-uint16_t drone_altitude = 30000; // PLACE HOLDER
+uint16_t UAV_altitude = 30000; // PLACE HOLDER
 
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
@@ -103,12 +103,12 @@ void deattach(){
 void retract(){
 
     //Two conditions for retracting the rope:
-    //Current altitude is less than the drone altitude wirth error
-    //The rope is really close to the drone or the rope already reached the drum and can not move (currrent speed = 0)
-    if(current_altitude < (drone_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > drone_altitude*(1-ALTITUDE_ERROR) && driver.current_speed == 0)){
+    //Current altitude is less than the UAV altitude wirth error
+    //The rope is really close to the UAV or the rope already reached the drum and can not move (currrent speed = 0)
+    if(current_altitude < (UAV_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > UAV_altitude*(1-ALTITUDE_ERROR) && driver.current_speed == 0)){
         driver.servo_release();
         //altitude +1 because log(<1) is negative
-        driver.motor_run_at(100* (1- log(current_altitude+1)/log(drone_altitude+1)));
+        driver.motor_run_at(100* (1- log(current_altitude+1)/log(UAV_altitude+1)));
     } else {
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
@@ -130,7 +130,7 @@ void calculate_speed(){
  * Update altitude of the rover
  */
 void update_current_altitude(){
-    current_altitude = drone_altitude - UAV_DISPLACMENT + driver.encoder_distance(uas_encoder);
+    current_altitude = UAV_altitude - UAV_DISPLACMENT + driver.encoder_distance(uas_encoder);
 }
 
 /**
@@ -201,6 +201,7 @@ void static main_operation_loop() {
 
     encoder_speed.update();
     rc_update.update();
+    UAV_altitude = driver.update_UAV_altitude();
     update_current_altitude();
 
     if (driver.rc_op_mode.mode == AUTO_MODE){
@@ -224,7 +225,7 @@ void static main_operation_loop() {
             auto_mission_completed = true;
         }
     //     manual mode
-    }else if (driver.rc_op_mode.mode == MANUAL_MODE){
+    }else if (driver.rc_op_mode.mode == MANUAL_MODE){             //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE
 
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();

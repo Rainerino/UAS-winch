@@ -116,6 +116,11 @@ public:
      */
     void encoder_update_current_speed(uint16_t delta_t, Encoder uas_encoder);
 
+    /**
+     * Update the altitude of the UAV
+     * @return
+     */
+    int16_t update_UAV_altitude();                          //NEEDS TO BE WRITTEN
 
     /**=======================================================
     * Motor functions

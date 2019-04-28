@@ -84,6 +84,10 @@ void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_enco
     }
 }
 
+int16_t UAS_driver::update_UAV_altitude(){          //NEEDS TO BE WRITTEN
+    return 30000;
+}
+
 int32_t UAS_driver::encoder_tick_diff(Encoder uas_encoder){
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
     int32_t difference = uint16_t(abs(encoder_cur_tick - encoder_prev_tick));
