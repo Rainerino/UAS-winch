@@ -133,7 +133,7 @@ void update_current_altitude(){
 /**
  * Interrupt function 2: update rc inputs
  */
-void rc_input_update(){                         //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE -Yekta
+void rc_input_update(){                         //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE - Yekta
     //noInterrupts();
     // update operation mode
     driver.rc_op_mode.raw_value  =  pulseIn(driver.rc_op_mode.pin, HIGH);
@@ -218,11 +218,13 @@ void static main_operation_loop() {
                 retract();
             }else{
                 // clean up function. mission is completed, we need to go to the idle mode
+                driver.servo_full_brake();
+                driver.motor_stop();
             }
             auto_mission_completed = true;
         }
     //     manual mode
-    }else if (driver.rc_op_mode.mode == MANUAL_MODE){             //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE
+    }else if (driver.rc_op_mode.mode == MANUAL_MODE){             //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE - Yekta
 
         if (driver.rc_failsafe.trigger){
             driver.servo_full_brake();

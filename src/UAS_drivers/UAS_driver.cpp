@@ -84,7 +84,7 @@ void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_enco
     }
 }
 
-int16_t UAS_driver::update_UAV_altitude(){          //NEEDS TO BE WRITTEN
+int16_t UAS_driver::update_UAV_altitude(){          //NEEDS TO BE WRITTEN - Yekta
     return 30000;
 }
 
@@ -234,4 +234,3 @@ void UAS_driver::lcd_display_encoder_data(Encoder uas_encoder) {
   display.print(String("distance:") + String(encoder_total_distance(uas_encoder), DEC));
   display.display();
 }
-
