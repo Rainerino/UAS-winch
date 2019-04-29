@@ -60,12 +60,8 @@ bool auto_release_completed;
 bool auto_deattachment_completed;
 bool auto_retract_completed;
 
-
-
-uint16_t difference;
-
-uint16_t current_altitude = 30000; // goes up to 65 meters PLACE HOLDER
-uint16_t UAV_altitude = 30000; // PLACE HOLDER
+uint16_t current_altitude;
+uint16_t UAV_altitude;
 
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
@@ -85,7 +81,7 @@ void release(){
     } else {
         //100 because using percentage
         //+1 beacue log(<1) is negative
-        driver.servo_brake_at(100* (1-log(current_altitude - DESIRED_DROP_ALTITUDE+1)/log(30-DESIRED_DROP_ALTITUDE+1)));
+        driver.servo_brake_at(100 * (1 - log(current_altitude - DESIRED_DROP_ALTITUDE+1) / log(30-DESIRED_DROP_ALTITUDE+1)));
     }   
 }
 
@@ -105,7 +101,8 @@ void retract(){
     //Two conditions for retracting the rope:
     //Current altitude is less than the UAV altitude wirth error
     //The rope is really close to the UAV or the rope already reached the drum and can not move (currrent speed = 0)
-    if(current_altitude < (UAV_altitude*(1-ALTITUDE_ERROR)) || !(current_altitude > UAV_altitude*(1-ALTITUDE_ERROR) && driver.current_speed == 0)){
+    if(current_altitude < (UAV_altitude*(1-ALTITUDE_ERROR)-UAV_DISPLACMENT) ||
+    !(current_altitude > UAV_altitude*(1-ALTITUDE_ERROR)-UAV_DISPLACMENT && driver.current_speed == 0)){
         driver.servo_release();
         //altitude +1 because log(<1) is negative
         driver.motor_run_at(100* (1- log(current_altitude+1)/log(UAV_altitude+1)));
