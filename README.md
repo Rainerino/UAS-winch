@@ -30,7 +30,7 @@ The testing **will**uses travis.
         
 
 ## Interface set ups
-
+![image](fig/teensy35.png)
 |name| type of signal (input/output)|port number|Set up |Comments|
 |---|---|---|---|---|
 |motor|output |enA on 14, in1, in2 on 10, 11 | ??????| in1, in2 control the direction| 
