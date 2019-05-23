@@ -68,7 +68,7 @@ double error;
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
-Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain rate
+Ticker rc_update(rc_trigger_update, RC_DELTA_T, 0); // update rc inputs at certain rate
 
 
 
