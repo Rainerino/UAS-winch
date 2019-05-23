@@ -207,10 +207,10 @@ public:
     uint32_t encoder_cur_tick;
     int encoder_cur_tick_int;
     bool encoder_invalid;
-
+    uint32_t encoder_prev_tick;
 
 private:
-    uint32_t encoder_prev_tick;
+    
     uint16_t motor_low;
     uint16_t motor_high;
     uint8_t motor_in1;

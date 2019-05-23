@@ -38,11 +38,11 @@ const int DESIRED_SPEED = 1500; //1.5m/s, 1500mm/s
 const int MOTOR_LOW = 100;
 const int MOTOR_HIGH = 255;
 
-const long DESIRED_DROP_ALTITUDE = 0.5;
+const long DESIRED_DROP_ALTITUDE = 3000;
 
 const long ALTITUDE_ERROR = 0.1;
 
-const int DEATTACHMENT_TIME = 5000;
+const int DETTACHMENT_TIME = 5000;
 
 const int UAV_DISPLACMENT = 200;
 
@@ -57,12 +57,14 @@ void rc_input_update();
 
 bool auto_mission_completed;
 bool auto_release_completed;
-bool auto_deattachment_completed;
+bool auto_dettachment_completed;
 bool auto_retract_completed;
 
 uint16_t current_altitude;
 uint16_t UAV_altitude;
 
+double last_error;
+double error;
 
 Ticker encoder_speed(calculate_speed, SPEED_DELTA_T, 0); // update speed at certain rate
 
@@ -74,23 +76,41 @@ Ticker rc_update(rc_input_update, RC_DELTA_T, 0); // update rc inputs at certain
  * Realeasing the rope and controlling its speed to lower the UGV to the DESIRED_DROP_ALTITUDE.
  */
 void release(){
-    if(current_altitude <= DESIRED_DROP_ALTITUDE){
-        driver.servo_full_brake();
-        driver.encoder_reset(uas_encoder);
+    if (driver.encoder_total_distance(uas_encoder) > DESIRED_DROP_ALTITUDE ){
         auto_release_completed = true;
-    } else {
-        //100 because using percentage
-        //+1 beacue log(<1) is negative
-        driver.servo_brake_at(100 * (1 - log(current_altitude - DESIRED_DROP_ALTITUDE+1) / log(30-DESIRED_DROP_ALTITUDE+1)));
-    }   
+        Serial.println("Release completed");
+    }else{
+        if (driver.current_speed < DESIRED_SPEED){
+            driver.servo_slow_brake();
+            driver.motor_start();
+            Serial.println("Currently letting it go.");
+        }else if(driver.encoder_cur_tick == driver.encoder_prev_tick){
+            // if the servo jams
+            driver.servo_release();
+            Serial.println("JAMMED! Stop the servo");
+        }else{
+            driver.servo_full_brake();
+            Serial.println("STOP!!");
+        }
+        // Use a PD controller
+        error = driver.current_speed - DESIRED_SPEED;
+        double K_P = 1;
+        double K_D = 1;
+
+        double output = K_P * error + K_D * (error - last_error);
+        Serial.printf("PD OUTPUT is: %f", output);
+        last_error = error;
+
+    }
+
 }
 
 /**
  * Waiting for the UGV to de-attach.
  */
-void deattach(){
-    delay(DEATTACHMENT_TIME); //Wait Time
-    auto_deattachment_completed = true;
+void dettach(){
+    delay(DETTACHMENT_TIME); //Wait Time
+    auto_dettachment_completed = true;
 }
 
 /**
@@ -101,11 +121,10 @@ void retract(){
     //Two conditions for retracting the rope:
     //Current altitude is less than the UAV altitude wirth error
     //The rope is really close to the UAV or the rope already reached the drum and can not move (currrent speed = 0)
-    if(current_altitude < (UAV_altitude*(1-ALTITUDE_ERROR)-UAV_DISPLACMENT) ||
-    !(current_altitude > UAV_altitude*(1-ALTITUDE_ERROR)-UAV_DISPLACMENT && driver.current_speed == 0)){
+    if(driver.current_speed != 0){
         driver.servo_release();
         //altitude +1 because log(<1) is negative
-        driver.motor_run_at(100* (1- log(current_altitude+1)/log(UAV_altitude+1)));
+        driver.motor_start();
     } else {
         driver.servo_full_brake();
         driver.encoder_reset(uas_encoder);
@@ -121,13 +140,6 @@ void calculate_speed(){
     // Give out warning if the current speed exceeds the rated speed, that means encoder is likely to be
     // missing steps and requires some restart or manual control.
     driver.encoder_valid(SPEED_DELTA_T);
-}
-
-/**
- * Update altitude of the rover
- */
-void update_current_altitude(){
-    current_altitude = UAV_altitude - UAV_DISPLACMENT + driver.encoder_distance(uas_encoder);
 }
 
 /**
@@ -161,6 +173,60 @@ void rc_input_update(){                         //NEEDS TO BE UPDATED WITH DE-AT
 //    interrupts();
 }
 
+void rc_trigger_update(){
+    driver.rc_failsafe.raw_value = pulseIn(driver.rc_failsafe.pin, HIGH);
+    driver.rc_failsafe.trigger = driver.rc_failsafe.raw_value > 1500;
+}
+
+void manualMode(){
+    if (driver.rc_failsafe.trigger){
+        driver.servo_full_brake();
+        driver.motor_stop();
+    }else{
+        if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
+            driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
+            driver.motor_stop();
+        }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
+            driver.servo_release();
+            //driver.motor_start();
+            driver.motor_run_at(driver.rc_speed_ctrl.percentage);
+        }else{
+            driver.servo_slow_brake();
+            driver.motor_stop();
+        }
+    }
+}
+
+void autoMode(){
+    // auto mode
+    // when swtich from manual to release, add a reset
+    if (driver.rc_failsafe.trigger){
+        if (!auto_mission_completed){
+            if(!auto_release_completed) {
+                // wait for trigger from XBEE
+                release();
+                Serial.println("AUTO IDLE");
+            }else if (!auto_dettachment_completed){
+                // wait for trigger from XBEE
+                dettach();
+            }else if (!auto_retract_completed){
+                retract();
+            }else{
+                // clean up function. mission is completed, we need to go to the idle mode
+                auto_mission_completed = true;
+            }
+        }else{
+            driver.servo_full_brake();
+            driver.motor_stop();
+        }
+    }else{
+        // gonna remove that
+        Serial.println("AUTO IDLE");
+        delay(LOOP_SPEED);
+    }
+//     manual mode
+}
+
 /**
  * this is the compeition operation set up function. We seperated it so that testing codes are easier to add.
  */
@@ -178,7 +244,7 @@ void static main_operation_setup(){
 
     auto_mission_completed = false;
     auto_release_completed = false;
-    auto_deattachment_completed = false;
+    auto_dettachment_completed = false;
     auto_retract_completed = false;
 
     driver.motor_set_range(MOTOR_LOW, MOTOR_HIGH);
@@ -195,54 +261,13 @@ void static main_operation_setup(){
  * this is the compeition operation loop.
  */
 void static main_operation_loop() {
-
     encoder_speed.update();
     rc_update.update();
-    UAV_altitude = driver.update_UAV_altitude();
-    update_current_altitude();
 
-    if (driver.rc_op_mode.mode == AUTO_MODE){
-
-        Serial.println("AUTO MODE IS NOT COMPLETED");
-        // auto mode
-        // when swtich from manual to release, add a reset
-        if (driver.rc_op_mode.change){
-            driver.encoder_reset(uas_encoder);
-            driver.rc_op_mode.change = false;
-        }else if (!auto_mission_completed){
-            if(!auto_release_completed) {
-                release();
-            }else if (!auto_deattachment_completed){
-                deattach();
-            }else if (!auto_retract_completed){
-                retract();
-            }else{
-                // clean up function. mission is completed, we need to go to the idle mode
-                driver.servo_full_brake();
-                driver.motor_stop();
-            }
-            auto_mission_completed = true;
-        }
-    //     manual mode
-    }else if (driver.rc_op_mode.mode == MANUAL_MODE){             //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE - Yekta
-
-        if (driver.rc_failsafe.trigger){
-            driver.servo_full_brake();
-            driver.motor_stop();
-        }else{
-            if(driver.rc_ctrl_mode.mode == RELEASE_MODE){
-                driver.servo_brake_at(driver.rc_speed_ctrl.percentage);
-                driver.motor_stop();
-            }else if(driver.rc_ctrl_mode.mode == RETRACT_MODE){
-                driver.servo_release();
-//                driver.motor_start();
-                  driver.motor_run_at(driver.rc_speed_ctrl.percentage);
-            }else{
-                driver.servo_slow_brake();
-                driver.motor_stop();
-            }
-        }
-    }
+    autoMode();
+    // }else if (driver.rc_op_mode.mode == MANUAL_MODE){             //NEEDS TO BE UPDATED WITH DE-ATTACHMENT PHASE - Yekta
+    //     manualMode();
+    // }
 
     driver.driver_test_message(uas_encoder);
     driver.lcd_display_encoder_data(uas_encoder);
@@ -254,7 +279,6 @@ void setup() {
 }
 
 void loop() {
-
     main_operation_loop();
 }
 
