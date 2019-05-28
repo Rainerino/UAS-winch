@@ -8,10 +8,9 @@ namespace winch{
 
     class Winch{
     public:
-
         Winch();
 
-        enum Mode {PRE_MISSION_IDLE , RELEASE, RETRACT, MISSION_IDLE, POST_MISSION_IDLE };
+        enum Mode {RELEASE, RETRACT, PRE_MISSION_IDLE , MISSION_IDLE, POST_MISSION_IDLE };
 
         enum Status {NORMAL, DEBUG, FAILSAFE};
 
@@ -43,9 +42,18 @@ namespace winch{
 
         void winchDebugMessage();
 
+        void missionIdle();
+
+        void postMissionIdle();
+
+        void preMissionIdle();
+        
+        void dropSpeedUpdate();
+
 
     private:
         UAS_driver driver;
+        Encoder uas_encoder;
     };
 }
 

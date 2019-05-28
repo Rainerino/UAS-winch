@@ -30,7 +30,7 @@ void UAS_driver::setup_pinMode(){
     digitalWrite(13, HIGH);                 //WHAT ARE THESE -Yekta
 }
 
-void UAS_driver::attach_motor( uint8_t in1, uint8_t in2){
+void UAS_driver::attach_motor( uint8_t motor_in1, uint8_t motor_in2){
     motor_in1 = in1;
     motor_in2 = in2;
 
@@ -75,7 +75,6 @@ bool UAS_driver::encoder_valid(uint16_t delta_t){
 
 void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_encoder){
     int32_t difference = encoder_tick_diff(uas_encoder);
-
     if (difference!= 0) {
         current_speed = uint16_t((abs(difference) * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
     }else{

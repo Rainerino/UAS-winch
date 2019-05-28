@@ -16,9 +16,6 @@
 
 #include "../Globals.h"
 
-#undef in1
-#undef in2
-
 
 class UAS_driver {
 
@@ -50,7 +47,7 @@ public:
      * @param in1
      * @param in2
      */
-    void attach_motor(uint8_t in1, uint8_t in2);
+    void attach_motor(uint8_t motor_in1, uint8_t motor_in2);
 
     /**
      * Set up and attach the servo pin. Can be change at anytime.
