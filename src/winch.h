@@ -1,8 +1,20 @@
 #ifndef WINCH_H
 #define WINCH_H
- 
-#include "Globals.h"
-#include "UAS_driver.h"
+
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "Arduino.h"
+#else
+	#include "WProgram.h"
+#endif
+
+#include "globals.h"
+
+#include <uas_servo.h>
+#include <uas_motor.h>
+#include <uas_comm.h>
+#include <rc_module.h>
+
+
 
 namespace winch{
 
@@ -52,8 +64,8 @@ namespace winch{
 
 
     private:
-        UAS_driver driver;
-        Encoder uas_encoder;
+        // UAS_driver driver;
+        // Encoder uas_encoder;
     };
 }
 

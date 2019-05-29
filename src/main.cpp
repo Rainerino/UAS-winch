@@ -1,5 +1,5 @@
-#include "UAS_drivers/Winch.h"
-#include "Globals.h"
+#include "winch.h"
+#include "globals.h"
 #include <Ticker.h>
 
 using namespace winch;
@@ -21,8 +21,8 @@ void encoderSpeedCallback(){
     uas_winch.dropSpeedUpdate();
 }
 
-Ticker rc_update(rcUpdateCallback, RC_DELTA_T, 0);
-Ticker encoder_speed(encoderSpeedCallback, SPEED_DELTA_T, 0);
+Ticker rc_update(rcUpdateCallback, global::RC_DELTA_T, 0);
+Ticker encoder_speed(encoderSpeedCallback, global::SPEED_DELTA_T, 0);
 Ticker auto_mode_update(autoModeCallback, 100, 0);
 Ticker manual_mode_update(manualModeCallback, 100, 0);
 Ticker winch_speed_update(encoderSpeedCallback, 100, 0);

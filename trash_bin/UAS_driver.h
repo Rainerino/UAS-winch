@@ -28,7 +28,7 @@ public:
         uint8_t mode; // to save mode
         bool change; // for detecting mode changes
         uint16_t percentage; // value out of 100, for speed control
-    }rc_failsafe, rc_speed_ctrl, rc_op_mode, rc_ctrl_mode;
+    }rc_failsafe, rc_speed_ctrl, rc_op_mode, rc_ctrl_mode, rc_trigger;
 
     /** =======================================================
      * Set up functions

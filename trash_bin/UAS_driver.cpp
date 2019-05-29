@@ -58,25 +58,25 @@ void UAS_driver::encoder_reset(Encoder uas_encoder){
 }
 uint32_t UAS_driver::encoder_total_distance(Encoder uas_encoder){
     encoder_cur_tick = uint32_t(abs(uas_encoder.read()));
-    return uint32_t(encoder_cur_tick * ENCODER_MM_PER_TICK_X_1000 / 1000.0);
+    return uint32_t(encoder_cur_tick * global::ENCODER_MM_PER_TICK_X_1000 / 1000.0);
 }
 
 int UAS_driver::encoder_distance(Encoder uas_encoder){
     encoder_cur_tick_int = int(uas_encoder.read());
-    return int(encoder_cur_tick * ENCODER_MM_PER_TICK_X_1000 / 1000.0);
+    return int(encoder_cur_tick * global::ENCODER_MM_PER_TICK_X_1000 / 1000.0);
 }
 
 
 bool UAS_driver::encoder_valid(uint16_t delta_t){
     // rpm -> rps -> tps -> mm ps -> mmps * s/s
-    encoder_invalid = current_speed > (((encoder_max_rpm / 60) * ENCODER_TICK_PER_RES) * (ENCODER_MM_PER_TICK_X_1000 /1000.0) ) * (delta_t/1);
+    encoder_invalid = current_speed > (((encoder_max_rpm / 60) * global::ENCODER_TICK_PER_RES) * (global::ENCODER_MM_PER_TICK_X_1000 /1000.0) ) * (delta_t/1);
     return encoder_invalid;
 }
 
 void UAS_driver::encoder_update_current_speed(uint16_t delta_t, Encoder uas_encoder){
     int32_t difference = encoder_tick_diff(uas_encoder);
     if (difference!= 0) {
-        current_speed = uint16_t((abs(difference) * ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
+        current_speed = uint16_t((abs(difference) * global::ENCODER_MM_PER_TICK_X_1000 / 1000.0) * (1000 / delta_t)); // mm/s
     }else{
         // avoid 0 division
         current_speed = 0;
@@ -136,28 +136,28 @@ void UAS_driver::servo_brake_range(uint16_t low, uint16_t high){
 void UAS_driver::servo_brake_at(uint16_t brake_percent){
     if(brake_percent < 0){brake_percent = 0;}
     uas_servo.write(static_cast<int>(map(brake_percent , 0, 100, servo_low_brake_angle, servo_high_brake_angle)));
-    delayMicroseconds(SERVO_DELAY);
+    delayMicroseconds(global::SERVO_DELAY);
 }
 void UAS_driver::servo_release(){
     uas_servo.write(servo_low_brake_angle);
-    delayMicroseconds(SERVO_DELAY);// for servo to get to that position;
+    delayMicroseconds(global::SERVO_DELAY);// for servo to get to that position;
 }
 void UAS_driver::servo_full_brake(){
     uas_servo.write(servo_high_brake_angle);
-    delayMicroseconds(SERVO_DELAY);// for servo to get to that position;
+    delayMicroseconds(global::SERVO_DELAY);// for servo to get to that position;
 }
 
 void UAS_driver::servo_slow_brake() {
     uas_servo.write((servo_high_brake_angle-servo_low_brake_angle)/2);
-    delayMicroseconds(SERVO_DELAY);// for servo to get to that position;
+    delayMicroseconds(global::SERVO_DELAY);// for servo to get to that position;
 }
 
 void UAS_driver::driver_test_message(Encoder uas_encoder){
     // manual mode
     Serial.println("============================");
-    Serial.println(ENCODER_MM_PER_TICK_X_1000);
-    Serial.println(ENCODER_MM_PER_RES);
-    Serial.println(ENCODER_TICK_PER_RES);
+    Serial.println(global::ENCODER_MM_PER_TICK_X_1000);
+    Serial.println(global::ENCODER_MM_PER_RES);
+    Serial.println(global::ENCODER_TICK_PER_RES);
 
     Serial.print("TOTAL Ticks: ");
     Serial.println(encoder_cur_tick);
