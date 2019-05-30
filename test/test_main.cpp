@@ -8,6 +8,9 @@
 // void tearDown(void) {
 // // clean stuff up here
 // }
+void writePulse(){
+    
+}
 
 void test_led_builtin_pin_number(void) {
     TEST_ASSERT_EQUAL(13, LED_BUILTIN);
@@ -22,6 +25,7 @@ void test_led_state_low(void) {
     digitalWrite(LED_BUILTIN, LOW);
     TEST_ASSERT_EQUAL(LOW, digitalRead(LED_BUILTIN));
 }
+
 
 void setup() {
     // NOTE!!! Wait for >2 secs
