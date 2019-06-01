@@ -16,16 +16,9 @@
 #include <uas_encoder.h>
 
 namespace winch{
-    extern uint16_t AUTO_RELEASE_DELTA_T;
 
-    // TODO: there could be more different delta T for auto mode
-    extern uint16_t MANUAL_DELTA_T;
-    extern double K_P;
-    extern double K_I;
-    extern double K_D;
-
-
-    enum Mode {RELEASE = 1, RETRACT, PRE_MISSION_IDLE , MISSION_IDLE, POST_MISSION_IDLE };
+    // TODO: use marcro for output
+    enum class Mode {RELEASE = 1, RETRACT, PRE_MISSION_IDLE , MISSION_IDLE, POST_MISSION_IDLE };
 
     enum ControllMode {AUTO = 1, MANUAL, RESET};
     
@@ -46,8 +39,8 @@ namespace winch{
     public:
         Winch();
 
-        ~Winch();
-
+        ~Winch(); // rule of 3 5 0
+        // 3: 
         void winchSetUp();
 
         Mode current_mode;
@@ -61,6 +54,25 @@ namespace winch{
         uint16_t status_led_delay;
 
         uint16_t steady_state_speed;
+
+        // T t(1, 2);
+        //void f(T&);
+        // f(T(1,2))
+        // f(t);
+        // void f(T&& s)
+        // template <typename T>
+        // T&&&&&&&&&&&&& t;
+        // void f(T&& t) {
+        // C c(int i) : t(i) {
+        //     t = T(i);
+        // }
+        // }
+        //     t = std::move(s)
+        // }
+
+        /**
+         * virtual void f();
+         */
 
         /**
          * Function that updates RC input on interval
@@ -105,10 +117,6 @@ namespace winch{
         // =========== Mode controll functions ================
 
         // ===============Auto Mode controll functions ======
-        void release();
-
-        void retract(); 
-
         void missionIdle();
 
         void postMissionIdle();
@@ -118,7 +126,10 @@ namespace winch{
         /**
          * controller function that contain PID
          */ 
-        void releaseController();
+        int16_t PIDcontroller();
+        // int16_t retractPIDController();
+
+        // int16_t releasePIDController();
         // ===============Auto Mode controll functions ======
 
 
@@ -130,13 +141,38 @@ namespace winch{
         rc::RCModule * rc;
         motor::UASMotor * motor;
         encoder::UASEncoder * encoder;
-        comm::UASComm * xbee;
-        uint16_t desired_drop_speed;
-        uint16_t current_drop_speed;
+        comm::UASComm * xbee; // TODO smart pointer
+
+
+        // int16_t desired_release_speed;
+        // int16_t current_release_speed;
+        // double current_release_error;
+        // int16_t last_release_speed;
+        // double current_release_percentage; 
+
+
+        // int16_t desired_retract_speed;
+        // int16_t current_retract_speed;
+        // int16_t last_retract_speed;
+        // double current_retract_error;
+        // double current_retract_percentage;
+        
+
+        int16_t desired_speed;
+        int16_t current_speed;
+        int16_t last_speed;
+        double current_PID_error;
+        double current_percentage;
+
+
+        double current_K_P;
+        double current_K_I;
+        double current_K_D;
+
         uint16_t released_rope_length;
 
-        double last_error;
         double error_sum;
+
 
     };
 
