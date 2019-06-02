@@ -46,17 +46,18 @@ void setup(){
     Serial.println("start setup2");
 
     // comm_update.start();
-    status_update.start();
+    // status_update.start();
     encoder_speed.start();
     rc_update.start();
     auto_mode_update.start();
     manual_mode_update.start();
 
+    // uas_winch->stop_motor();
 }
 
 void loop(){
     // comm_update.update();
-    status_update.update();
+    // status_update.update();
     encoder_speed.update();
     rc_update.update();
     auto_mode_update.update();

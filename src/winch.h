@@ -20,10 +20,11 @@ namespace winch{
     // TODO: use marcro for output
     enum class Mode {RELEASE = 1, RETRACT, PRE_MISSION_IDLE , MISSION_IDLE, POST_MISSION_IDLE };
 
-    enum ControllMode {AUTO = 1, MANUAL, RESET};
+    enum class ControllMode {AUTO = 1, MANUAL, RESET};
     
-    enum ErrorFlags
+    enum class ErrorFlags
     {
+        NONE = 0,
         RC_INPUT_ERROR = 1,
         ENCODER_READING_ERROR = 2,
         SPEED_ERROR = 4,
@@ -110,10 +111,11 @@ namespace winch{
          * 
          */ 
         void manualMode();
-
+        /**
+         * 
+         */ 
         void resetMode();
         
-
         // =========== Mode controll functions ================
 
         // ===============Auto Mode controll functions ======
