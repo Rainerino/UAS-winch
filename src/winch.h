@@ -30,9 +30,11 @@ namespace winch{
         SPEED_ERROR = 4,
         OTHER_ERROR = 8
     };
+
     inline ErrorFlags operator|=( ErrorFlags a,  ErrorFlags b){
         return static_cast< ErrorFlags>(static_cast<int>(a) | static_cast<int>(b));
     }
+
     enum Status {NORMAL = 1, DEBUG, FAILSAFE, ERROR};
 
     class Winch{
@@ -56,24 +58,8 @@ namespace winch{
 
         uint16_t steady_state_speed;
 
-        // T t(1, 2);
-        //void f(T&);
-        // f(T(1,2))
-        // f(t);
-        // void f(T&& s)
-        // template <typename T>
-        // T&&&&&&&&&&&&& t;
-        // void f(T&& t) {
-        // C c(int i) : t(i) {
-        //     t = T(i);
-        // }
-        // }
-        //     t = std::move(s)
-        // }
+        uint16_t auto_current_delta_t;
 
-        /**
-         * virtual void f();
-         */
 
         /**
          * Function that updates RC input on interval
@@ -125,40 +111,34 @@ namespace winch{
 
         void preMissionIdle();
 
+        /** 
+         * 
+         * We already passed the mode check at this function.
+         * 
+         */ 
+        void release();
+
+        /** 
+         * 
+         * 
+         */ 
+        void retract();
+
         /**
          * controller function that contain PID
          */ 
-        int16_t PIDcontroller();
-        // int16_t retractPIDController();
+        int16_t PIDcontroller(int16_t input_speed);
 
-        // int16_t releasePIDController();
         // ===============Auto Mode controll functions ======
 
 
         void winchDebugMessage();
 
-
-
     private:
         rc::RCModule * rc;
         motor::UASMotor * motor;
         encoder::UASEncoder * encoder;
-        comm::UASComm * xbee; // TODO smart pointer
-
-
-        // int16_t desired_release_speed;
-        // int16_t current_release_speed;
-        // double current_release_error;
-        // int16_t last_release_speed;
-        // double current_release_percentage; 
-
-
-        // int16_t desired_retract_speed;
-        // int16_t current_retract_speed;
-        // int16_t last_retract_speed;
-        // double current_retract_error;
-        // double current_retract_percentage;
-        
+        comm::UASComm * xbee; // TODO smart pointer        
 
         int16_t desired_speed;
         int16_t current_speed;
@@ -172,15 +152,10 @@ namespace winch{
         double current_K_D;
 
         uint16_t released_rope_length;
-
+        uint16_t starting_position;
+        uint16_t end_of_release_position;
         double error_sum;
-
-
     };
 
-}
-
-
-
-
+};
 #endif

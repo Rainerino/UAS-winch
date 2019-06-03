@@ -28,22 +28,21 @@ void encoderSpeedCallback(){
 }
 
 Ticker rc_update(rcUpdateCallback, global::RC_DELTA_T, 0);
-Ticker encoder_speed(encoderSpeedCallback, encoder::SPEED_DELTA_T, 0);
+Ticker encoder_speed(encoderSpeedCallback, global::SPEED_DELTA_T, 0);
 
-Ticker auto_mode_update(autoModeCallback, 100, 0);
-Ticker manual_mode_update(manualModeCallback, 100, 0);
+Ticker auto_mode_update(autoModeCallback, uas_winch->auto_current_delta_t, 0);
+Ticker manual_mode_update(manualModeCallback, global::MANUAL_DELTA_T, 0);
 
-Ticker comm_update(communicationCallback, comm::COMM_DELTA_T, 0 );
+Ticker comm_update(communicationCallback, global::COMM_DELTA_T, 0 );
 Ticker status_update(statusLEDCallback,500, 0);
 
 
 void setup(){
     delay(3000);
-    Serial.println("start setup");
+
     uas_winch = new winch::Winch();
-    Serial.println("start setup1");
+
     uas_winch->winchSetUp();
-    Serial.println("start setup2");
 
     // comm_update.start();
     // status_update.start();

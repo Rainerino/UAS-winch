@@ -7,7 +7,7 @@ namespace winch{
         : rc(new rc::RCModule()) ,
           motor(new motor::UASMotor(IN1_PIN, IN2_PIN, ENA_PIN)),
           encoder( new encoder::UASEncoder(A_SIGNAL, B_SIGNAL)),
-          xbee(new comm::UASComm(comm::WINCH_SYSTEM))
+          xbee(new comm::UASComm(comm::System::WINCH_SYSTEM))
     {
 
         motor->motor_run_at(0);
@@ -21,23 +21,12 @@ namespace winch{
         current_error = ErrorFlags::NONE;
 
         current_controll_mode = ControllMode::RESET;
-        
-        // current_percentage = 0;
 
-        // current_PID_error = 0;
+        auto_current_delta_t = global::AUTO_RELEASE_DELTA_T;
 
-        // desired_speed = 0;
+        starting_position = 0;
 
-        // current_speed = 0;
-
-        // last_speed = 0;
-
-        // current_K_P = global::K_P_RELEASE;
-
-        // current_K_I = global::K_I_RELEASE;
-
-        // current_K_D = global::K_D_RELEASE;
-
+        end_of_release_position = 0;
     }
 
     Winch::~Winch(){
@@ -90,7 +79,7 @@ namespace winch{
     }
 
     void Winch::updateDropSpeed(){
-        current_speed =  encoder->encoderUpdateCurrentSpeed(encoder::SPEED_DELTA_T);
+        current_speed =  encoder->encoderUpdateCurrentSpeed(global::SPEED_DELTA_T);
         released_rope_length =  encoder->encoderTotalDistance();
     }
 
@@ -102,30 +91,36 @@ namespace winch{
     }
 
     void Winch::autoMode(){
-        if (current_controll_mode == ControllMode::AUTO){
-            current_mode = Mode::RELEASE;
-            motor->motor_run_at(PIDcontroller());
-        }
+        if (current_controll_mode == ControllMode::AUTO && rc->rc_winch_auto_mode_trigger.trigger){
+            
+            #if UAS_DEBUG
+                Serial.println("============DEBUG MODE!");
+            #else
+                Serial.println("WHAEVER?");
+            #endif
 
-        // if (current_controll_mode == AUTO && rc->rc_winch_auto_mode_trigger.trigger){
-        //     // TODO: add reset and check change
-        //     if (rc->rc_winch_auto_mode_trigger.change){
-        //         current_mode = RELEASE;
-        //         rc->rc_winch_auto_mode_trigger.change = false;
-        //     }
-        //     if (current_mode == RELEASE){
-        //         this->release();
-        //     }else if (current_mode == RETRACT){
-        //         this->retract();
-        //     }else if(current_mode == MISSION_IDLE){
-        //         this->missionIdle();
-        //     }else if(current_mode == POST_MISSION_IDLE){
-        //         this->postMissionIdle();
-        //     }else{
-        //     }
-        // }else{
-        //     this->preMissionIdle();
-        // }
+            if (rc->rc_winch_auto_mode_trigger.change){
+                encoder->encoderReset();
+                current_mode = Mode::RELEASE;
+                xbee->current_signal += comm::Flags::WINCH_DROP_TRIGGERED;
+                rc->rc_winch_auto_mode_trigger.change = false;
+                delay(global::AUTO_RELEASE_TRIGGER_WAIT_TIME);
+                starting_position = encoder->encoderTotalDistance();
+            }
+            if (current_mode == Mode::RELEASE){
+                this->release();
+            }else if (current_mode == Mode::RETRACT){
+                this->retract();
+            }else if(current_mode == Mode::MISSION_IDLE){
+                this->missionIdle();
+            }else if(current_mode == Mode::POST_MISSION_IDLE){
+                this->postMissionIdle();
+            }else{
+                // there is a problem
+            }
+        }else{
+            this->preMissionIdle();
+        }
 
     }
 
@@ -141,25 +136,23 @@ namespace winch{
             current_PID_error = 0;
             error_sum = 0;
             motor->motor_run_at(0);
+            encoder->encoderReset();
         }
-
     }
 
-    int16_t Winch::PIDcontroller(){
+    int16_t Winch::PIDcontroller(int16_t input_speed){
+        desired_speed = input_speed;
+
         if(current_mode == Mode::RELEASE){
             current_K_P = global::K_P_RELEASE;
             current_K_I = global::K_I_RELEASE;
             current_K_D = global::K_D_RELEASE;
-
-            desired_speed = global::DESIRED_RELEASE_SPEED;
-
         }else if(current_mode == Mode::RETRACT){
             current_K_P = global::K_P_RETRACT;
             current_K_I = global::K_I_RETRACT;
             current_K_D = global::K_D_RETRACT;
-
-            desired_speed = global::DESIRED_RETRACT_SPEED;
         }
+
         double delta_speed = current_speed - last_speed;
         current_PID_error = current_K_P * current_PID_error + current_K_D * delta_speed;
 
@@ -195,16 +188,39 @@ namespace winch{
 
     }
 
-    void Winch::missionIdle(){
+   void Winch::release(){
+        // wait for the xbee. 
+        if (xbee->current_signal & comm::Flags::ROVER_NEAR_GROUND && !(xbee->current_signal & comm::Flags::ROVER_RELEASED)){
+            motor->motor_run_at(PIDcontroller(global::DESIRED_SLOW_RELEASE_SPEED));
+        }else if (xbee->current_signal & comm::Flags::ROVER_RELEASED){
+            end_of_release_position = encoder->encoderTotalDistance();
+            current_mode = Mode::RETRACT;
+            released_rope_length = end_of_release_position - starting_position;
+        }else{
+            motor->motor_run_at(PIDcontroller(global::DESIRED_RELEASE_SPEED));
+        }   
+    }
 
+    void Winch::retract(){
+        if (encoder->encoderTotalDistance() > starting_position){
+            motor->motor_run_at(PIDcontroller(global::DESIRED_RETRACT_SPEED));
+        }else{
+            current_mode = Mode::POST_MISSION_IDLE;
+        }
+    }
+
+    void Winch::missionIdle(){
+        // after release,, this will hang on Rover. 
     }
 
     void Winch::postMissionIdle(){
-
+        // Make sure that the rope is holden down
+        // TODO: tune this number
+        motor->motor_run_at(global::POST_MISSION_IDLE_PERCENT);
     }
 
     void Winch::preMissionIdle(){
-
+        // not sure if there are anything for this
     }
 
     void Winch::winchDebugMessage(){
