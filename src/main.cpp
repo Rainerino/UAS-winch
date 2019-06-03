@@ -30,7 +30,7 @@ void encoderSpeedCallback(){
 Ticker rc_update(rcUpdateCallback, global::RC_DELTA_T, 0);
 Ticker encoder_speed(encoderSpeedCallback, global::SPEED_DELTA_T, 0);
 
-Ticker auto_mode_update(autoModeCallback, uas_winch->auto_current_delta_t, 0);
+Ticker auto_mode_update(autoModeCallback, 100, 0);
 Ticker manual_mode_update(manualModeCallback, global::MANUAL_DELTA_T, 0);
 
 Ticker comm_update(communicationCallback, global::COMM_DELTA_T, 0 );
@@ -45,7 +45,7 @@ void setup(){
     uas_winch->winchSetUp();
 
     // comm_update.start();
-    // status_update.start();
+    status_update.start();
     encoder_speed.start();
     rc_update.start();
     auto_mode_update.start();
@@ -56,7 +56,7 @@ void setup(){
 
 void loop(){
     // comm_update.update();
-    // status_update.update();
+    status_update.update();
     encoder_speed.update();
     rc_update.update();
     auto_mode_update.update();
