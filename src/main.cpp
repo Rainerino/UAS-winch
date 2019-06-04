@@ -41,21 +41,18 @@ void setup(){
     delay(3000);
 
     uas_winch = new winch::Winch();
-
     uas_winch->winchSetUp();
-
-    // comm_update.start();
+    comm_update.start();
     status_update.start();
     encoder_speed.start();
     rc_update.start();
     auto_mode_update.start();
     manual_mode_update.start();
-
     // uas_winch->stop_motor();
 }
 
 void loop(){
-    // comm_update.update();
+    comm_update.update();
     status_update.update();
     encoder_speed.update();
     rc_update.update();

@@ -140,9 +140,9 @@ namespace winch{
         encoder::UASEncoder * encoder;
         comm::UASComm * xbee; // TODO smart pointer        
 
-        int16_t desired_speed;
-        int16_t current_speed;
-        int16_t last_speed;
+        double desired_speed;
+        double current_speed;
+        double last_speed;
         double current_PID_error;
         double current_percentage;
 
