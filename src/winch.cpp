@@ -24,7 +24,7 @@ namespace winch{
 
         auto_current_delta_t = global::AUTO_RELEASE_DELTA_T;
 
-        starting_position = 0;
+        start_of_release_position = 0;
 
         end_of_release_position = 0;
 
@@ -53,8 +53,6 @@ namespace winch{
         if(!rc->rcWinchAutoModeTriggerReading()){
             current_status = ERROR;
             current_error |= ErrorFlags::RC_INPUT_ERROR;
-        }else{
-            xbee->winchDropTriggerStage();
         }
     }
     void Winch::updateRCModeInput(){
@@ -82,7 +80,6 @@ namespace winch{
 
     void Winch::updateDropSpeed(){
         current_speed =  encoder->encoderUpdateCurrentSpeed(global::SPEED_DELTA_T);
-        released_rope_length =  encoder->encoderTotalDistance();
     }
 
     void Winch::updateSystemStatusLED(){
@@ -97,10 +94,10 @@ namespace winch{
             if (current_mode == Mode::PRE_MISSION_IDLE && rc->rc_winch_auto_mode_trigger.trigger){
                 encoder->encoderReset();
                 current_mode = Mode::RELEASE;
-                xbee->current_signal = comm::Flags::WINCH_DROP_TRIGGERED;
 
+                xbee->winchDropTriggerStage();
                 // delay(global::AUTO_RELEASE_TRIGGER_WAIT_TIME);
-                starting_position = encoder->encoderTotalDistance();
+                start_of_release_position = encoder->encoderTotalDistance();
 
             }else if (current_mode == Mode::RELEASE){
                 release();
@@ -116,12 +113,10 @@ namespace winch{
         }else{
             this->preMissionIdle();
         }
-
         // current_mode = Mode::RELEASE;
         // motor->motor_run_at(PIDcontroller(global::DESIRED_RELEASE_SPEED));     
         // current_mode = Mode::RETRACT;
         // retract();  
-        }
         
     }
 
@@ -197,8 +192,6 @@ namespace winch{
 
             current_mode = Mode::RETRACT;
 
-            released_rope_length = end_of_release_position - starting_position;
-
         }else{
             motor->motor_run_at(PIDcontroller(global::DESIRED_RELEASE_SPEED));
         }  
@@ -208,9 +201,11 @@ namespace winch{
     void Winch::retract(){
         // TODO: FIX THIS!!!
         auto_current_delta_t = global::AUTO_RETRACT_DELTA_T;
-        if (encoder->encoderTotalDistance() > starting_position){
+        // if (encoder-> abs(encoder->encoderTotalDistance() - end_of_release_position) < (end_of_release_position -  start_of_release_position)){
+        if (encoder->encoder->read() < 0){
             motor->motor_run_at(PIDcontroller(global::DESIRED_RETRACT_SPEED));
         }else{
+
             current_mode = Mode::POST_MISSION_IDLE;
         }
 
@@ -233,16 +228,17 @@ namespace winch{
     }
 
     void Winch::winchDebugMessage(){
-        // rc->rcSerialDebug();
+        rc->rcSerialDebug();
         encoder->encoderSerialDebug();
         motor->motorSerialDebug();
-        // xbee->serialDebug();
+        xbee->serialDebug();
 
         Serial.printf(F("=====Controller Debug ========\n"));
+        Serial.printf(F("Retract: start: %d, end %d, curent: %d\n"), start_of_release_position, end_of_release_position,encoder->encoderTotalDistance() );
         Serial.printf(F("current pid error: %f\n"), current_PID_error);
         // Serial.printf(F("current error sum: %f\n"), error_sum);
-        Serial.printf(F("current mode: %d\n"), current_mode);
-        Serial.printf(F("current controll mode: %d\n"), current_controll_mode);
+        Serial.printf(F("current mode: %d (1 is release, 2 is retract)\n"), current_mode);
+        Serial.printf(F("current controll mode (1 is auto): %d\n"), current_controll_mode);
         Serial.printf(F("current percentage: %f\n\n"), current_percentage);
     }
 };

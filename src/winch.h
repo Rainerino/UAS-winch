@@ -151,9 +151,10 @@ namespace winch{
         double current_K_I;
         double current_K_D;
 
-        uint16_t released_rope_length;
-        uint16_t starting_position;
+        uint16_t start_of_release_position;
         uint16_t end_of_release_position;
+
+
         double error_sum;
     };
 
