@@ -10,7 +10,7 @@
 
 #include <globals.h>
 #include <uas_servo.h>
-#include <uas_motor.h>
+#include <uas_motor_MX1508.h>
 #include <uas_comm.h>
 #include <rc_module.h>
 #include <uas_encoder.h>

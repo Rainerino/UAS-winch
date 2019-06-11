@@ -11,7 +11,7 @@
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Encoder_ID129/utility",
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/PWMServo-master",
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Ticker_ID1586",
-                "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/uas_drivers",
+                "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/UAS_Drivers",
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Adafruit GFX Library_ID13",
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Adafruit SSD1306_ID135",
                 "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Servo_ID883/src",
@@ -138,7 +138,7 @@
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Encoder_ID129/utility",
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/PWMServo-master",
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Ticker_ID1586",
-                    "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/uas_drivers",
+                    "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/UAS_Drivers",
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Adafruit GFX Library_ID13",
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Adafruit SSD1306_ID135",
                     "c:/Users/yanyi/Documents/Collections/airdrop-software/lib/Servo_ID883/src",
@@ -259,18 +259,18 @@
             },
             "defines": [
                 "PLATFORMIO=30607",
-                "__MK66FX1M0__",
-                "TEENSY36",
+                "__MK20DX256__",
+                "TEENSY31",
                 "USB_SERIAL",
                 "ARDUINO=10805",
                 "TEENSYDUINO=145",
-                "F_CPU=180000000L",
+                "F_CPU=72000000L",
                 "LAYOUT_US_ENGLISH",
                 ""
             ],
             "intelliSenseMode": "clang-x64",
             "cppStandard": "c++14",
-            "compilerPath": "\"C:/Users/yanyi/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe\" -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16"
+            "compilerPath": "\"C:/Users/yanyi/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe\" -mthumb -mcpu=cortex-m4"
         }
     ],
     "version": 4

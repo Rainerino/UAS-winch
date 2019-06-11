@@ -149,7 +149,7 @@ namespace winch{
             current_K_D = global::K_D_RETRACT;
         }
 
-        if (current_mode == Mode::RELEASE && current_speed != 0){
+        if (current_mode == Mode::RELEASE && (current_speed != 0 || current_percentage > global::RELEASE_STALL_PERCENT) ){
             if (encoder->direction == encoder::Direction::DOWN){
                 current_PID_error -= current_K_P * (desired_speed - current_speed) + current_K_D * (current_speed - last_speed);
             }else if (encoder->direction == encoder::Direction::UP){
@@ -159,7 +159,7 @@ namespace winch{
             // current_PID_error -= current_K_P * (desired_speed - current_speed) + current_K_D * (current_speed - last_speed);
             // current_PID_error += current_K_P * (desired_speed - current_speed);
 
-        }else if (current_mode == Mode::RETRACT && current_speed != 0){
+        }else if (current_mode == Mode::RETRACT && ( current_speed != 0|| current_percentage > global::RETRACT_STALL_PERCENT) ){
             // current_PID_error += current_K_P * (desired_speed - current_speed);
             current_PID_error += current_K_P * (desired_speed - current_speed) + current_K_D * (current_speed - last_speed);
         }

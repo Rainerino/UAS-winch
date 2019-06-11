@@ -23,6 +23,10 @@ void manualModeCallback(){
     uas_winch->manualMode();
 }
 
+void resetModeCallback(){
+    uas_winch->resetMode();
+}
+
 void encoderSpeedCallback(){
     uas_winch->updateDropSpeed();
 }
@@ -32,6 +36,7 @@ Ticker encoder_speed(encoderSpeedCallback, global::SPEED_DELTA_T, 0);
 
 Ticker auto_mode_update(autoModeCallback, 100, 0);
 Ticker manual_mode_update(manualModeCallback, global::MANUAL_DELTA_T, 0);
+Ticker reset_mode_update(resetModeCallback, 100, 0);
 
 Ticker comm_update(communicationCallback, global::COMM_DELTA_T, 0 );
 Ticker status_update(statusLEDCallback,500, 0);
@@ -39,7 +44,6 @@ Ticker status_update(statusLEDCallback,500, 0);
 
 void setup(){
     delay(3000);
-
     uas_winch = new winch::Winch();
     uas_winch->winchSetUp();
     comm_update.start();
@@ -48,6 +52,8 @@ void setup(){
     rc_update.start();
     auto_mode_update.start();
     manual_mode_update.start();
+    reset_mode_update.start();
+
     // uas_winch->stop_motor();
 }
 
@@ -58,4 +64,5 @@ void loop(){
     rc_update.update();
     auto_mode_update.update();
     manual_mode_update.update();
+    reset_mode_update.update();
 }
